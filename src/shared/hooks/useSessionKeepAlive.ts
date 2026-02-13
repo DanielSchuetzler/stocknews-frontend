@@ -9,14 +9,14 @@
  *
  * How it works:
  * 1. Monitors authentication state from useAuthStore
- * 2. When user logs in: Starts unconditional heartbeat (every 30 minutes)
+ * 2. When user logs in: Starts heartbeat (first fires after 30 min, not immediately)
  * 3. When user logs out: Stops heartbeat
  * 4. On session expiry (401): Clears auth store and redirects to login
  *
  * Session Lifecycle:
  * - Backend session: 30 days timeout (stored in PostgreSQL)
  * - Frontend heartbeat: Every 30 minutes (unconditional, no activity check)
- * - Backend rotates session ID on each heartbeat (security)
+ * - Heartbeat extends session timeout (sliding window)
  * - User stays logged in as long as tab is open or app visited within 30 days
  * - Sessions survive backend container restarts (Spring Session JDBC)
  */

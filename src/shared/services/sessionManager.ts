@@ -2,19 +2,23 @@
  * Session Manager Service
  *
  * Keeps the user session alive by sending periodic heartbeat requests.
- * The backend rotates the session ID on each heartbeat for security.
  *
  * How it works:
  * 1. When user logs in, SessionManager starts sending heartbeat requests
  * 2. Every 30 minutes, calls /api/auth/refresh endpoint (unconditionally)
- * 3. Backend extends session timeout (sliding window) and rotates session ID
+ * 3. Backend extends session timeout (sliding window)
  * 4. If heartbeat fails (401), triggers session expiry event
  * 5. When user logs out, stops heartbeat
+ *
+ * IMPORTANT: The first heartbeat is DELAYED (not immediate) to avoid
+ * race conditions with other requests that fire on page load (F5).
+ * On page reload, useCurrentUser already calls GET /api/auth/me which
+ * extends the session. Firing an immediate heartbeat would cause
+ * concurrent requests with different timing, risking 401/403 errors.
  *
  * Session Lifecycle:
  * - Backend session timeout: 30 days (stored in PostgreSQL via Spring Session JDBC)
  * - Heartbeat interval: 30 minutes (unconditional, no activity check)
- * - Session ID rotates every 30 min (stolen cookies expire fast)
  * - User stays logged in as long as tab is open (or app is visited within 30 days)
  * - Sessions survive backend container restarts (persisted in DB)
  */
@@ -54,12 +58,13 @@ class SessionManager {
       return;
     }
 
-    console.log('[SessionManager] Starting heartbeat (interval: 30 minutes)');
+    console.log('[SessionManager] Starting heartbeat (interval: 30 minutes, first in 30 min)');
 
-    // Send initial heartbeat immediately
-    this.sendHeartbeat();
-
-    // Schedule periodic heartbeats (unconditional - no activity check)
+    // Do NOT send initial heartbeat immediately!
+    // On page reload (F5), useCurrentUser already calls GET /api/auth/me
+    // which extends the session. An immediate heartbeat would cause
+    // concurrent requests and potential race conditions.
+    // The first heartbeat fires after 30 minutes.
     this.heartbeatIntervalId = window.setInterval(() => {
       this.sendHeartbeat();
     }, HEARTBEAT_INTERVAL);
@@ -94,7 +99,7 @@ class SessionManager {
     try {
       const { data } = await apiClient.post('/auth/refresh');
 
-      console.log('[SessionManager] Session refreshed (ID rotated)', {
+      console.log('[SessionManager] Session refreshed', {
         expiresIn: data.expiresIn,
         expiresInDays: Math.floor(data.expiresIn / 86400),
       });
