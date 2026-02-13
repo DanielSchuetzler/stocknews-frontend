@@ -6,7 +6,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Get API base URL from environment variables
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Production: VITE_API_URL ist leer → relative URL "" → Browser ruft /api/* auf gleichem Host auf
+// Development: VITE_API_URL = "http://localhost:8080" → direkter Aufruf ans Backend
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 /**
  * Main API client instance
