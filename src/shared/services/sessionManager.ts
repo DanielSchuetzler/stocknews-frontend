@@ -19,7 +19,10 @@
  * - Sessions survive backend container restarts (persisted in DB)
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+// Gleiche Variable wie in client.ts: VITE_API_URL
+// Production: leer → relative URL → /api/auth/refresh auf gleichem Host
+// Development: http://localhost:8080 → direkter Backend-Aufruf
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 // Heartbeat interval: 30 minutes
 // Sent unconditionally (no activity tracking) to ensure session never expires
