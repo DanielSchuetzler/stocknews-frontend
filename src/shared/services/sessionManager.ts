@@ -19,10 +19,7 @@
  * - Sessions survive backend container restarts (persisted in DB)
  */
 
-// Gleiche Variable wie in client.ts: VITE_API_URL
-// Production: leer → relative URL → /api/auth/refresh auf gleichem Host
-// Development: http://localhost:8080 → direkter Backend-Aufruf
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+import { apiClient } from '../api/client';
 
 // Heartbeat interval: 30 minutes
 // Sent unconditionally (no activity tracking) to ensure session never expires
@@ -88,30 +85,15 @@ class SessionManager {
 
   /**
    * Send heartbeat request to backend
-   * Backend will: validate session, extend timeout, rotate session ID
+   * Nutzt den zentralen apiClient (Axios) statt fetch():
+   * - Gleiche baseURL-Logik (lokal + VPS)
+   * - CSRF-Token wird automatisch mitgesendet
+   * - Cookies (JSESSIONID) werden automatisch mitgesendet
    */
   private async sendHeartbeat(): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include', // Send session cookie
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const { data } = await apiClient.post('/auth/refresh');
 
-      if (response.status === 401) {
-        // Session expired
-        console.warn('[SessionManager] Session expired (401)');
-        this.handleSessionExpired();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`Heartbeat failed: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
       console.log('[SessionManager] Session refreshed (ID rotated)', {
         expiresIn: data.expiresIn,
         expiresInDays: Math.floor(data.expiresIn / 86400),
@@ -121,7 +103,14 @@ class SessionManager {
       if (this.config.onSessionRefreshed) {
         this.config.onSessionRefreshed(data.expiresIn);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Check if session expired (401)
+      if (error?.response?.status === 401) {
+        console.warn('[SessionManager] Session expired (401)');
+        this.handleSessionExpired();
+        return;
+      }
+
       console.error('[SessionManager] Heartbeat error:', error);
 
       if (this.config.onError) {
