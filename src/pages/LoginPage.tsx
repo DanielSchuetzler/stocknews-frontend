@@ -1,0 +1,14 @@
+/**
+ * Login Page
+ * Full page wrapper for login form
+ */
+
+import { LoginForm } from '@/features/auth/LoginForm';
+
+export const LoginPage = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <LoginForm />
+    </div>
+  );
+};

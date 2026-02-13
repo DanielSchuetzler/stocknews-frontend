@@ -1,0 +1,14 @@
+/**
+ * Register Page
+ * Full page wrapper for register form
+ */
+
+import { RegisterForm } from '@/features/auth/RegisterForm';
+
+export const RegisterPage = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <RegisterForm />
+    </div>
+  );
+};

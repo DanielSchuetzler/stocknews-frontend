@@ -1,0 +1,97 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "StockNewsPulse" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e9]: StockNewsPulse
+      - generic [ref=e11]:
+        - textbox "Suche nach Aktien..." [ref=e12]
+        - img
+      - navigation [ref=e13]:
+        - link "Erklärung" [ref=e14] [cursor=pointer]:
+          - /url: /erklarung
+        - link "Dashboard" [ref=e15] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=e16]:
+          - link "👤 testuser_1768849028552" [ref=e17] [cursor=pointer]:
+            - /url: /settings
+          - button "Logout" [ref=e18] [cursor=pointer]
+  - main [ref=e19]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "Anmelden" [level=1] [ref=e24]
+        - paragraph [ref=e25]: Willkommen zurück bei StockNewsPulse
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: Benutzername
+          - textbox "Benutzername" [ref=e29]:
+            - /placeholder: Dein Benutzername
+        - generic [ref=e30]:
+          - generic [ref=e31]: Passwort
+          - textbox "Passwort" [ref=e32]:
+            - /placeholder: Dein Passwort
+        - button "Anmelden" [ref=e33] [cursor=pointer]
+      - generic [ref=e36]: oder
+      - button "Mit Google anmelden" [ref=e39] [cursor=pointer]:
+        - img [ref=e40]
+        - text: Mit Google anmelden
+      - paragraph [ref=e46]:
+        - text: Noch kein Konto?
+        - link "Jetzt registrieren" [ref=e47] [cursor=pointer]:
+          - /url: /register
+  - contentinfo [ref=e48]:
+    - generic [ref=e51]:
+      - heading "⚖️ Rechtlicher Hinweis & Haftungsausschluss" [level=3] [ref=e52]
+      - generic [ref=e53]:
+        - paragraph [ref=e54]:
+          - strong [ref=e55]: "Keine Anlageberatung:"
+          - text: Die auf dieser Plattform bereitgestellten Informationen, Analysen und Visualisierungen dienen ausschließlich zu allgemeinen Informationszwecken und stellen keine Anlageberatung, Finanzberatung oder Empfehlung zum Kauf oder Verkauf von Wertpapieren dar.
+        - paragraph [ref=e56]:
+          - strong [ref=e57]: "Eigenverantwortung:"
+          - text: Jede Investitionsentscheidung erfolgt auf eigenes Risiko. Der Betreiber übernimmt keinerlei Haftung für Verluste oder Schäden, die sich aus der Nutzung dieser Informationen ergeben. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse.
+        - paragraph [ref=e58]:
+          - strong [ref=e59]: "Keine Gewähr:"
+          - text: Trotz sorgfältiger Recherche wird keine Gewähr für die Richtigkeit, Vollständigkeit und Aktualität der bereitgestellten Daten übernommen. Kursinformationen können verzögert sein.
+        - paragraph [ref=e60]:
+          - strong [ref=e61]: "Professionelle Beratung:"
+          - text: Vor jeder Anlageentscheidung sollten Sie einen zugelassenen Finanzberater konsultieren und Ihre individuelle Situation, Risikobereitschaft und Anlageziele berücksichtigen.
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - heading "Über StockNewsPulse" [level=4] [ref=e66]
+          - paragraph [ref=e67]: Analyse-Tool zur Visualisierung von Zusammenhängen zwischen Aktienkursen und News-Events. Entwickelt für Recherche und Bildungszwecke.
+        - generic [ref=e68]:
+          - heading "Rechtliches" [level=4] [ref=e69]
+          - list [ref=e70]:
+            - listitem [ref=e71]:
+              - link "Haftungsausschluss" [ref=e72] [cursor=pointer]:
+                - /url: "#disclaimer"
+            - listitem [ref=e73]:
+              - link "Datenschutz" [ref=e74] [cursor=pointer]:
+                - /url: /datenschutz
+            - listitem [ref=e75]:
+              - link "Impressum" [ref=e76] [cursor=pointer]:
+                - /url: /impressum
+            - listitem [ref=e77]:
+              - link "Quellennachweise" [ref=e78] [cursor=pointer]:
+                - /url: /quellen
+        - generic [ref=e79]:
+          - heading "Ressourcen" [level=4] [ref=e80]
+          - list [ref=e81]:
+            - listitem [ref=e82]:
+              - link "BaFin - Finanzaufsicht" [ref=e83] [cursor=pointer]:
+                - /url: https://www.bafin.de
+            - listitem [ref=e84]:
+              - link "Yahoo Finance" [ref=e85] [cursor=pointer]:
+                - /url: https://finance.yahoo.com
+            - listitem [ref=e86]: API Dokumentation (in Arbeit)
+      - generic [ref=e87]:
+        - generic [ref=e88]:
+          - paragraph [ref=e89]: © 2026 StockNewsPulse. Alle Rechte vorbehalten.
+          - paragraph [ref=e90]: Powered by React & Spring Boot | v1.0.0
+        - generic [ref=e91]: 🚀 Beta Version
+```
