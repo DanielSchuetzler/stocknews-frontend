@@ -28,10 +28,7 @@ export const OAuth2CallbackPage = () => {
 
   useEffect(() => {
     // Prevent double execution (React StrictMode runs effects twice)
-    if (hasProcessed.current) {
-      console.log('[OAuth] Already processed, skipping');
-      return;
-    }
+    if (hasProcessed.current) return;
     hasProcessed.current = true;
     const handleCallback = async () => {
       // Get code and state from URL
@@ -71,14 +68,11 @@ export const OAuth2CallbackPage = () => {
       sessionStorage.removeItem('oauth_state');
 
       try {
-        console.log('[OAuth] Sending callback to backend...', { code: code?.substring(0, 10), state: state?.substring(0, 10) });
-
         // Send code and state to backend
         const response = await apiClient.get(
           `/auth/oauth2/callback/google?code=${code}&state=${state}`
         );
 
-        console.log('[OAuth] Backend response:', response.data);
         const data = response.data;
 
         // Store user in auth store
@@ -86,21 +80,17 @@ export const OAuth2CallbackPage = () => {
           id: data.userId,
           email: data.email
         };
-        console.log('[OAuth] Setting user in store:', user);
         setUser(user);
 
         // Mark as success to prevent showing any UI
         setStatus('success');
 
-        // CRITICAL FIX: Wait for store to be persisted to localStorage
-        // This prevents race condition where navigation happens before isAuthenticated is true
+        // Wait for store to be persisted to localStorage
         await new Promise(resolve => setTimeout(resolve, 50));
 
-        // Redirect immediately - only show welcome for new registrations
+        // Redirect - show welcome for new registrations
         const welcomeParam = data.isNewUser ? '?welcome=true' : '';
-        const targetUrl = `/dashboard${welcomeParam}`;
-        console.log('[OAuth] Navigating to:', targetUrl);
-        navigate(targetUrl, { replace: true });
+        navigate(`/dashboard${welcomeParam}`, { replace: true });
       } catch (err) {
         console.error('OAuth callback error:', err);
         setStatus('error');

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /oauth2/
+
+Sitemap: https://stocknewspulse.info/sitemap.xml

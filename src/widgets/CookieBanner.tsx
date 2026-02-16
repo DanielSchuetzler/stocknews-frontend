@@ -1,10 +1,13 @@
 /**
  * Cookie Banner Component
- * Minimal and discreet cookie consent banner for Google AdSense
- * GDPR-compliant with localStorage persistence
+ * DSGVO/TDDDG-compliant cookie consent for Google AdSense
+ * - Link to Datenschutz page
+ * - Clear accept/decline options
+ * - Consent stored in localStorage
  */
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const STORAGE_KEY = 'cookie_consent';
 
@@ -12,12 +15,10 @@ export const CookieBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if user has already made a choice
     const consent = localStorage.getItem(STORAGE_KEY);
     if (!consent) {
       setIsVisible(true);
     } else if (consent === 'accepted') {
-      // Load Google AdSense if consent was given
       loadGoogleAdSense();
     }
   }, []);
@@ -34,7 +35,6 @@ export const CookieBanner = () => {
   };
 
   const loadGoogleAdSense = () => {
-    // Only load if not already loaded
     if (!document.querySelector('script[data-ad-client]')) {
       const script = document.createElement('script');
       script.async = true;
@@ -69,13 +69,17 @@ export const CookieBanner = () => {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-        <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>🍪</span>
+        <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>&#x1F36A;</span>
         <p style={{
           color: 'var(--text-primary)',
           margin: 0,
           lineHeight: '1.4'
         }}>
-          Wir verwenden Cookies für Google AdSense, um diese Website zu finanzieren und Ihr Erlebnis zu verbessern.
+          Wir verwenden optionale Cookies f&uuml;r Werbung (Google AdSense).
+          Technisch notwendige Cookies (Session, CSRF-Schutz) werden immer gesetzt.{' '}
+          <Link to="/datenschutz" style={{ color: 'var(--primary-color)' }}>
+            Mehr erfahren
+          </Link>
         </p>
       </div>
 
