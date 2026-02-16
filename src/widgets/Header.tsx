@@ -3,12 +3,11 @@
  * EXACT design from original frontend with dark theme
  */
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { CompanyAutocomplete } from '@/features/search/CompanyAutocomplete';
 
 export const Header = () => {
-  const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
