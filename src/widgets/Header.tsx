@@ -11,9 +11,10 @@ export const Header = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
+  const handleLogout = () => {
+    // Just call logout - navigation is handled inside useLogout hook
+    // No need for navigate('/') here, it would cause a double navigation
+    logout();
   };
 
   return (

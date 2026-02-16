@@ -38,10 +38,15 @@ export const authKeys = {
  */
 export const useCurrentUser = () => {
   const setUser = useAuthStore((state) => state.setUser);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const query = useQuery({
     queryKey: authKeys.currentUser,
     queryFn: getCurrentUser,
+    // CRITICAL: Only fetch if user might be authenticated (localStorage says so)
+    // After logout, isAuthenticated is false → query is disabled → no GET /auth/me
+    // On page reload (F5), isAuthenticated is restored from localStorage → query fires
+    enabled: isAuthenticated,
     // Smart retry logic: Only retry on transient network errors, not auth failures
     retry: (failureCount, error: any) => {
       // Don't retry auth errors (401 = not logged in, 403 = forbidden)
@@ -162,26 +167,27 @@ export const useLogout = () => {
     mutationFn: logout,
     // On successful logout
     onSuccess: () => {
-      // Clear auth store
+      // STEP 1: Clear auth store FIRST (sets isAuthenticated = false)
+      // This disables useCurrentUser query (enabled: isAuthenticated)
+      // so it won't fire GET /auth/me after logout
       clearUser();
 
-      // CRITICAL FIX: Only remove auth-related queries instead of clearing everything
-      // This prevents losing user's browsing data (stocks, news, favorites)
-      // which can be safely kept in cache even after logout
-      queryClient.removeQueries({ queryKey: authKeys.currentUser });
-      queryClient.removeQueries({ queryKey: ['auth'] }); // All auth-related queries
+      // STEP 2: Cancel any in-flight auth queries
+      queryClient.cancelQueries({ queryKey: authKeys.currentUser });
 
-      // Navigate to home
+      // STEP 3: Remove cached auth data
+      queryClient.removeQueries({ queryKey: authKeys.currentUser });
+      queryClient.removeQueries({ queryKey: ['auth'] });
+
+      // STEP 4: Navigate to home
       navigate('/');
     },
     // Even on error, clear local state (session might be expired)
     onError: () => {
       clearUser();
-
-      // Same targeted query removal on error
+      queryClient.cancelQueries({ queryKey: authKeys.currentUser });
       queryClient.removeQueries({ queryKey: authKeys.currentUser });
       queryClient.removeQueries({ queryKey: ['auth'] });
-
       navigate('/');
     },
   });
