@@ -7,7 +7,6 @@ export interface FavoriteStats {
   favoriteId: number;
   ticker: string;
   companyName: string;
-  sector?: string;
   exchange?: string;
   aiNewsCount: number; // Count of AI-generated news
   userNewsCount: number; // Count of user-created news

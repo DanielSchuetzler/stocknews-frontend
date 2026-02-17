@@ -596,28 +596,6 @@ export const StockDetailPage = () => {
                 background: 'var(--background)',
                 borderRadius: '8px'
               }}>
-                {company.sector && (
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Sektor
-                    </div>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {company.sector}
-                    </div>
-                  </div>
-                )}
-
-                {company.industry && (
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Branche
-                    </div>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {company.industry}
-                    </div>
-                  </div>
-                )}
-
                 {company.country && (
                   <div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -629,70 +607,38 @@ export const StockDetailPage = () => {
                   </div>
                 )}
 
-                {company.marketCap && (
+                {company.exchange && (
                   <div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Marktkapitalisierung
+                      Börse
                     </div>
                     <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {company.marketCap}
+                      {company.exchange}
                     </div>
-                  </div>
-                )}
-
-                {company.employees !== undefined && company.employees !== null && (
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Mitarbeiter
-                    </div>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {company.employees.toLocaleString('de-DE')}
-                    </div>
-                  </div>
-                )}
-
-                {company.founded && (
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Gegründet
-                    </div>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {company.founded}
-                    </div>
-                  </div>
-                )}
-
-                {company.ceo && (
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      CEO
-                    </div>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {company.ceo}
-                    </div>
-                  </div>
-                )}
-
-                {company.website && (
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Website
-                    </div>
-                    <a
-                      href={company.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: 'var(--primary-color)',
-                        fontWeight: 600,
-                        textDecoration: 'none'
-                      }}
-                    >
-                      {company.website.replace(/^https?:\/\//,'')} →
-                    </a>
                   </div>
                 )}
               </div>
+
+              {/* Business Model */}
+              {company.businessModel && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Geschäftsmodell
+                  </div>
+                  <p style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>{company.businessModel}</p>
+                </div>
+              )}
+
+              {/* Products */}
+              {company.products && (
+                <div style={{ marginTop: '1rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Produkte & Services
+                  </div>
+                  <p style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>{company.products}</p>
+                </div>
+              )}
+
             </div>
           </div>
         )}

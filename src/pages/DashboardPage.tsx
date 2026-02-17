@@ -329,17 +329,6 @@ export const DashboardPage = () => {
                     </th>
                     <th style={{
                       padding: '1rem',
-                      textAlign: 'left',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Sektor
-                    </th>
-                    <th style={{
-                      padding: '1rem',
                       textAlign: 'center',
                       fontSize: '0.875rem',
                       fontWeight: 600,
@@ -418,13 +407,6 @@ export const DashboardPage = () => {
                         fontWeight: 500
                       }}>
                         {fav.companyName}
-                      </td>
-                      <td style={{
-                        padding: '1rem',
-                        color: 'var(--text-secondary)',
-                        fontSize: '0.9rem'
-                      }}>
-                        {fav.sector || '—'}
                       </td>
                       <td style={{
                         padding: '1rem',
