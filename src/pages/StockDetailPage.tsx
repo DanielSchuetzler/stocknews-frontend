@@ -205,18 +205,82 @@ export const StockDetailPage = () => {
   }
 
   const companyName = company?.name || stockData.name || ticker;
-  const description = `Analyse von ${companyName} (${ticker}): Aktueller Kurs ${stockData.prices[stockData.prices.length - 1].close.toFixed(2)} ${stockData.currency}. Historische News-Events und deren Einfluss auf den Aktienkurs.`;
+  const latestPrice = stockData.prices[stockData.prices.length - 1].close.toFixed(2);
+  const currencySymbol = stockData.currency === 'USD' ? '$' : stockData.currency === 'EUR' ? '€' : stockData.currency;
+  const exchange = company?.exchange || stockData.exchange || '';
+
+  // SEO: Einprägsame, informative Meta-Texte
+  const pageTitle = `${companyName} (${ticker}) Aktie – News & Kursverlauf | StockNewsPulse`;
+  const metaDescription = `${companyName} (${ticker}): Aktueller Kurs ${latestPrice} ${currencySymbol}. Sieh welche News den ${ticker}-Kurs bewegt haben – historisch visualisiert auf StockNewsPulse. Kostenlos, ohne Anmeldung.`;
+  const ogTitle = `${companyName} (${ticker}) – Warum bewegt sich der Kurs?`;
+  const ogDescription = `Entdecke, wie News den ${companyName}-Aktienkurs beeinflusst haben. Interaktiver Chart mit historischen Ereignissen – sofort verständlich für private & institutionelle Investoren.`;
+  const canonicalUrl = `https://stocknewspulse.info/stocks/${ticker}`;
+
+  // JSON-LD: Strukturierte Daten für die Stock-Seite
+  const stockJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": `${companyName} (${ticker}) Aktienanalyse`,
+    "description": metaDescription,
+    "url": canonicalUrl,
+    "inLanguage": "de",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "StockNewsPulse",
+      "url": "https://stocknewspulse.info"
+    },
+    "about": {
+      "@type": "Corporation",
+      "name": companyName,
+      "tickerSymbol": ticker,
+      "exchange": exchange || undefined,
+      "url": canonicalUrl
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "StockNewsPulse",
+          "item": "https://stocknewspulse.info"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": `${companyName} (${ticker})`,
+          "item": canonicalUrl
+        }
+      ]
+    }
+  };
 
   return (
     <>
       {/* SEO Meta Tags */}
       <Helmet>
-        <title>{companyName} ({ticker}) - Aktienkurs & News | StockNewsPulse</title>
-        <meta name="description" content={description} />
-        <meta property="og:title" content={`${companyName} Aktienanalyse`} />
-        <meta property="og:description" content={description} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph */}
         <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="StockNewsPulse" />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content="https://stocknewspulse.info/og-image.png" />
+        <meta property="og:locale" content="de_DE" />
+
+        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        <meta name="twitter:image" content="https://stocknewspulse.info/og-image.png" />
+
+        {/* Structured Data */}
+        <script type="application/ld+json">{JSON.stringify(stockJsonLd)}</script>
       </Helmet>
 
       {/* Container - Max 1400px like original */}

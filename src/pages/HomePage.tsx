@@ -4,6 +4,7 @@
  */
 
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { CompanyAutocomplete } from '@/features/search/CompanyAutocomplete';
 
 export const HomePage = () => {
@@ -13,8 +14,31 @@ export const HomePage = () => {
     navigate(`/stocks/${ticker}`);
   };
 
+  const homeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "StockNewsPulse – Aktienkurs trifft News",
+    "description": "Historische Visualisierung von Aktien-News-Events auf dem Kurschart. Verstehe, wie Nachrichten Kursbewegungen ausgelöst haben.",
+    "url": "https://stocknewspulse.info",
+    "inLanguage": "de",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", "h2", ".hero-description"]
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh' }}>
+      <Helmet>
+        <title>StockNewsPulse – Warum bewegt sich eine Aktie? News erklärt den Kurs</title>
+        <meta name="description" content="StockNewsPulse mappt historische News-Events auf den Aktienchart. Verstehe, welche Nachrichten Kursbewegungen ausgelöst haben – kostenlos, für 15.000+ Aktien weltweit." />
+        <link rel="canonical" href="https://stocknewspulse.info/" />
+        <meta property="og:url" content="https://stocknewspulse.info/" />
+        <meta property="og:title" content="StockNewsPulse – Der Kurs erklärt sich selbst" />
+        <meta property="og:description" content="News-Events direkt im Aktienchart sehen. Historische Kursanalyse für private & institutionelle Investoren. 15.000+ Aktien, kostenlos." />
+        <script type="application/ld+json">{JSON.stringify(homeJsonLd)}</script>
+      </Helmet>
+
       {/* Hero Section */}
       <section style={{
         background: 'var(--background-gradient)',
