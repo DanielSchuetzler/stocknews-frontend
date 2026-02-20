@@ -20,6 +20,7 @@ import { ImpressumPage } from '@/pages/ImpressumPage';
 import { QuellenPage } from '@/pages/QuellenPage';
 import { ErklärungPage } from '@/pages/ErklärungPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { OAuth2CallbackPage } from '@/pages/OAuth2CallbackPage';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { Header } from '@/widgets/Header';
 import { Footer } from '@/widgets/Footer';
@@ -56,6 +57,7 @@ function App() {
           <Route path="/impressum" element={<ImpressumPage />} />
           <Route path="/quellen" element={<QuellenPage />} />
           <Route path="/erklarung" element={<ErklärungPage />} />
+          <Route path="/oauth2/callback/google" element={<OAuth2CallbackPage />} />
           <Route path="/settings" element={
             <ProtectedRoute>
               <SettingsPage />

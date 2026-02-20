@@ -1,14 +1,17 @@
 /**
  * OAuth2 Callback Page
- * Handles redirect from Google OAuth consent screen
+ * Google redirects the user HERE (frontend) with code + state.
  *
  * Flow:
- * 1. Google redirects to this page with code and state parameters
- * 2. Page automatically sends code/state to backend
- * 3. Backend validates, creates session, returns user data
- * 4. Page stores user in auth store and redirects to dashboard
+ * 1. Google redirects to /oauth2/callback/google?code=XXX&state=YYY (THIS page)
+ * 2. Page validates state (CSRF protection)
+ * 3. Page calls backend /api/auth/oauth2/callback/google?code=...&state=... via Axios (withCredentials)
+ * 4. Backend exchanges code for token, creates user, sets JSESSIONID cookie in response
+ * 5. Axios receives the cookie → browser stores it (same-origin, no redirect involved)
+ * 6. Page navigates to /dashboard via React Router (cookie already set)
  *
- * URL: /oauth2/callback?code=XXX&state=YYY
+ * Why this works: The backend call is a direct fetch (not a browser redirect),
+ * so Set-Cookie is reliably stored before navigation happens.
  */
 
 import { useEffect, useState, useRef } from 'react';
@@ -30,8 +33,8 @@ export const OAuth2CallbackPage = () => {
     // Prevent double execution (React StrictMode runs effects twice)
     if (hasProcessed.current) return;
     hasProcessed.current = true;
+
     const handleCallback = async () => {
-      // Get code and state from URL
       const code = searchParams.get('code');
       const state = searchParams.get('state');
       const error = searchParams.get('error');
@@ -47,30 +50,28 @@ export const OAuth2CallbackPage = () => {
         return;
       }
 
-      // Validate code and state exist
       if (!code || !state) {
         setStatus('error');
         setErrorMessage('Ungültige OAuth-Parameter.');
         return;
       }
 
-      // CRITICAL SECURITY: Validate OAuth state to prevent CSRF attacks
+      // CSRF: Validate state against sessionStorage
       const storedState = sessionStorage.getItem('oauth_state');
       if (!storedState || storedState !== state) {
-        console.error('[OAuth] State mismatch detected - possible CSRF attack');
+        console.error('[OAuth] State mismatch - possible CSRF attack');
         setStatus('error');
         setErrorMessage('Sicherheitsfehler: OAuth-State stimmt nicht überein. Bitte versuche es erneut.');
         sessionStorage.removeItem('oauth_state');
         return;
       }
-
-      // Clear state after successful validation
       sessionStorage.removeItem('oauth_state');
 
       try {
-        // Send code and state to backend
+        // Call backend via Axios (withCredentials=true → Set-Cookie is stored by browser)
+        // Backend exchanges code for token, creates/finds user, sets JSESSIONID cookie
         const response = await apiClient.get(
-          `/auth/oauth2/callback/google?code=${code}&state=${state}`
+          `/auth/oauth2/callback/google?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
         );
 
         const data = response.data;
@@ -82,30 +83,29 @@ export const OAuth2CallbackPage = () => {
         };
         setUser(user);
 
-        // Mark as success to prevent showing any UI
         setStatus('success');
 
-        // Wait for store to be persisted to localStorage
-        await new Promise(resolve => setTimeout(resolve, 50));
+        // Small delay to ensure cookie is persisted before navigation
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-        // Redirect - show welcome for new registrations
         const welcomeParam = data.isNewUser ? '?welcome=true' : '';
         navigate(`/dashboard${welcomeParam}`, { replace: true });
-      } catch (err) {
-        console.error('OAuth callback error:', err);
+
+      } catch (err: unknown) {
+        console.error('[OAuth] Callback error:', err);
+
+        // Try to extract error message from backend response
+        const axiosError = err as { response?: { data?: { error?: string; message?: string } } };
+        const backendMsg = axiosError?.response?.data?.error || axiosError?.response?.data?.message;
+
         setStatus('error');
-        setErrorMessage(
-          err instanceof Error
-            ? err.message
-            : 'Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.'
-        );
+        setErrorMessage(backendMsg || 'Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.');
       }
     };
 
-    // Only run once on mount - ignore deps warning since we want this to run exactly once
     handleCallback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps = run only once on mount
+  }, []);
 
   return (
     <div className="app-container" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
@@ -116,7 +116,6 @@ export const OAuth2CallbackPage = () => {
       }}>
         {(status === 'loading' || status === 'success') && (
           <>
-            {/* Loading Spinner */}
             <div style={{
               width: '64px',
               height: '64px',
@@ -147,7 +146,6 @@ export const OAuth2CallbackPage = () => {
 
         {status === 'error' && (
           <>
-            {/* Error Icon */}
             <div style={{
               width: '64px',
               height: '64px',
@@ -158,16 +156,8 @@ export const OAuth2CallbackPage = () => {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#ef4444"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="15" y1="9" x2="9" y2="15" />
                 <line x1="9" y1="9" x2="15" y2="15" />
@@ -194,17 +184,13 @@ export const OAuth2CallbackPage = () => {
             <button
               onClick={() => navigate('/login')}
               className="btn-primary"
-              style={{
-                padding: '0.75rem 1.5rem',
-                fontSize: '1rem'
-              }}
+              style={{ padding: '0.75rem 1.5rem', fontSize: '1rem' }}
             >
               Zurück zur Anmeldung
             </button>
           </>
         )}
 
-        {/* CSS for loading spinner animation */}
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes spin {
             0% { transform: rotate(0deg); }
