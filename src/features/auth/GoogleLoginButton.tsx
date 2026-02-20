@@ -41,13 +41,19 @@ export const GoogleLoginButton = ({
 
     try {
       // Get Google authorization URL from backend
-      // Backend generates URL with state parameter and redirect_uri to backend
       const response = await apiClient.get('/auth/oauth2/google');
+      const authUrl: string = response.data.authUrl;
+
+      // Extract state parameter from URL and store in sessionStorage for CSRF validation
+      // sessionStorage survives the Google redirect because it stays on the same tab
+      const urlParams = new URLSearchParams(new URL(authUrl).search);
+      const state = urlParams.get('state');
+      if (state) {
+        sessionStorage.setItem('oauth_state', state);
+      }
 
       // Redirect user to Google consent screen
-      // Google will redirect back to backend: /api/auth/oauth2/callback/google
-      // Backend will create session and redirect to frontend dashboard
-      window.location.href = response.data.authUrl;
+      window.location.href = authUrl;
     } catch (err) {
       console.error('Google login error:', err);
       setError('Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.');
