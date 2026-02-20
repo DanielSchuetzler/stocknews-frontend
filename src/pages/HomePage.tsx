@@ -3,12 +3,14 @@
  * EXACT design from original frontend with dark theme
  */
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { CompanyAutocomplete } from '@/features/search/CompanyAutocomplete';
 
 export const HomePage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const accountDeleted = searchParams.get('deleted') === 'true';
 
   const handleExampleClick = (ticker: string) => {
     navigate(`/stocks/${ticker}`);
@@ -29,6 +31,20 @@ export const HomePage = () => {
 
   return (
     <div style={{ minHeight: '100vh' }}>
+      {accountDeleted && (
+        <div style={{
+          background: '#f0fdf4',
+          borderBottom: '1px solid #bbf7d0',
+          padding: '1rem',
+          textAlign: 'center',
+          color: '#166534',
+          fontSize: '0.95rem',
+          fontWeight: 500
+        }}>
+          ✓ Dein Konto wurde erfolgreich gelöscht.
+        </div>
+      )}
+
       <Helmet>
         <title>StockNewsPulse – Warum bewegt sich eine Aktie? News erklärt den Kurs</title>
         <meta name="description" content="StockNewsPulse mappt historische News-Events auf den Aktienchart. Verstehe, welche Nachrichten Kursbewegungen ausgelöst haben – kostenlos, für 15.000+ Aktien weltweit." />

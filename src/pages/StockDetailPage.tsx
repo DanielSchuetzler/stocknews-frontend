@@ -332,18 +332,6 @@ export const StockDetailPage = () => {
                 {currentPrice ? `${currentPrice.toFixed(2)} ${stockData.currency === 'USD' ? '$' : stockData.currency}` : 'N/A'}
               </span>
             </div>
-            {company?.lastUpdatedAt && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aktualisiert:</span>
-                <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
-                  {new Date(company.lastUpdatedAt).toLocaleDateString('de-DE', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  })}
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Favorite Button - small and subtle */}

@@ -241,14 +241,12 @@ export const useDeleteAccount = () => {
   return useMutation({
     mutationFn: (data: DeleteAccountRequest) => deleteAccount(data),
     onSuccess: () => {
-      // Clear auth store
+      // Clear auth store and cached queries
       clearUser();
-
-      // Clear all cached queries
       queryClient.clear();
 
-      // Navigate to home
-      navigate('/');
+      // Navigate to home page with success flag (no auth guard there)
+      navigate('/?deleted=true', { replace: true });
     },
   });
 };
