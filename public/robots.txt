@@ -3,12 +3,6 @@
 
 User-agent: *
 Allow: /
-Allow: /stocks/
-Allow: /erklarung
-Allow: /quellen
-Allow: /impressum
-Allow: /datenschutz
-Disallow: /api/
 Disallow: /dashboard
 Disallow: /settings
 Disallow: /oauth2/
