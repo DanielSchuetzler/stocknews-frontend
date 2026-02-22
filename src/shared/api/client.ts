@@ -3,7 +3,11 @@
  * Centralized HTTP client with interceptors for authentication and error handling
  */
 
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+
+interface CsrfRetryConfig extends AxiosRequestConfig {
+  _csrfRetry?: boolean;
+}
 
 // Get API base URL from environment variables
 // Production: VITE_API_URL ist leer → relative URL "" → Browser ruft /api/* auf gleichem Host auf
@@ -87,14 +91,33 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const config = error.config as CsrfRetryConfig | undefined;
+
+    // Handle 403 caused by a missing CSRF token (race condition after login/register).
+    // The 403 response from Spring Security includes a fresh Set-Cookie: XSRF-TOKEN,
+    // so we wait one tick for the browser to commit it, then retry exactly once.
+    // We ONLY retry when X-XSRF-TOKEN was absent in the original request – if the
+    // header was present but rejected that is a real auth error and must not be retried.
+    if (
+      error.response?.status === 403 &&
+      config &&
+      !config._csrfRetry &&
+      !error.config?.headers?.['X-XSRF-TOKEN']
+    ) {
+      config._csrfRetry = true;
+      // Yield to the event loop so the browser can process the Set-Cookie header
+      await new Promise(resolve => setTimeout(resolve, 0));
+      const csrfToken = getCsrfToken();
+      if (csrfToken && config.headers) {
+        (config.headers as Record<string, string>)['X-XSRF-TOKEN'] = csrfToken;
+      }
+      return apiClient(config);
+    }
+
     // Handle 401 Unauthorized - session expired or not authenticated
     if (error.response?.status === 401) {
-      // Clear any local auth state
-      // The useAuthStore will handle redirect to login
       console.warn('[API] Session expired or unauthorized');
-
-      // Dispatch custom event for auth components to listen to
       window.dispatchEvent(new Event('auth:unauthorized'));
     }
 

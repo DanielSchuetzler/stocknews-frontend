@@ -99,12 +99,7 @@ export const useLogin = () => {
         email: response.email,
       });
 
-      // CRITICAL FIX: Wait for store to be persisted to localStorage
-      // This prevents race condition where navigation happens before isAuthenticated is true
-      // Increased delay for E2E tests where timing is more critical
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // Navigate to dashboard - now guaranteed that store is updated
+      // Navigate to dashboard - backend sets CSRF cookie in login response
       navigate('/dashboard');
     },
     // Error handling
@@ -139,12 +134,7 @@ export const useRegister = () => {
         email: response.email,
       });
 
-      // CRITICAL FIX: Wait for store to be persisted to localStorage
-      // This prevents race condition where navigation happens before isAuthenticated is true
-      // Increased delay for E2E tests where timing is more critical
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // Navigate to dashboard with welcome banner for new registrations
+      // Navigate to dashboard - backend sets CSRF cookie in register response
       navigate('/dashboard?welcome=true');
     },
     // Error handling
