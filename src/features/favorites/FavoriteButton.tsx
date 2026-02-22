@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useFavoriteCheck, useToggleFavorite } from '@/entities/favorite/queries';
 
@@ -13,7 +12,6 @@ interface FavoriteButtonProps {
 }
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
-  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { data: favoriteCheck, isLoading: checkLoading, refetch } = useFavoriteCheck(ticker);
   const { toggleFavorite, isLoading: toggleLoading } = useToggleFavorite();
@@ -27,11 +25,11 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
   const isFavorite = optimisticFavorite !== null ? optimisticFavorite : (favoriteCheck?.isFavorite ?? false);
   const isLoading = checkLoading || toggleLoading;
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const handleClick = async () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
 
     // Optimistic update
     const newFavoriteState = !isFavorite;

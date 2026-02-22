@@ -112,20 +112,22 @@ export const Header = () => {
             </Link>
           )}
 
-          <Link
-            to="/erklarung"
-            style={{
-              color: 'var(--text-secondary)',
-              textDecoration: 'none',
-              fontWeight: 500,
-              fontSize: '0.95rem',
-              transition: 'color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-          >
-            Erklärung
-          </Link>
+          {!isAuthenticated && (
+            <Link
+              to="/erklarung"
+              style={{
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                fontWeight: 500,
+                fontSize: '0.95rem',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              Erklärung
+            </Link>
+          )}
 
           {/* Auth Section */}
           {isAuthenticated && user ? (
@@ -143,6 +145,21 @@ export const Header = () => {
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
               >
                 Dashboard
+              </Link>
+
+              <Link
+                to="/erklarung"
+                style={{
+                  color: 'var(--text-secondary)',
+                  textDecoration: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.95rem',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                Erklärung
               </Link>
 
               <div style={{
