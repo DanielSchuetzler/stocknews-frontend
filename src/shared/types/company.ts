@@ -6,7 +6,6 @@
 export interface Company {
   id: number;
   ticker: string;
-  isin?: string;
   name: string;
   country?: string;
   exchange?: string;

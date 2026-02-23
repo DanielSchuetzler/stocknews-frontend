@@ -26,7 +26,6 @@ export const ENDPOINTS = {
   COMPANIES: {
     AUTOCOMPLETE: (query: string) => `/companies/autocomplete?query=${encodeURIComponent(query)}`,
     GET_BY_TICKER: (ticker: string) => `/companies/ticker/${ticker}`,
-    GET_BY_ISIN: (isin: string) => `/companies/isin/${isin}`,
     SEARCH: (query: string) => `/companies/search?q=${encodeURIComponent(query)}`,
   },
 
