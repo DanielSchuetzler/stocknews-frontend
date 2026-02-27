@@ -697,7 +697,7 @@ export const StockDetailPage = () => {
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 1200px) {
           .main-content-wrapper {
-            grid-template-columns: 1fr 450px !important;
+            grid-template-columns: 1fr clamp(450px, 35vw, 600px) !important;
             align-items: start;
           }
 
