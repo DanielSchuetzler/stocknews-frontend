@@ -3,6 +3,7 @@
  * TanStack Query hooks for fetching and caching stock data
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStockData } from './api';
 import type { TimeRange, StockPrice } from '@/shared/types';
@@ -37,16 +38,17 @@ export const useFilteredPrices = (
   prices: StockPrice[] | undefined,
   timeRange: TimeRange
 ) => {
-  if (!prices || prices.length === 0) return [];
+  return useMemo(() => {
+    if (!prices || prices.length === 0) return [];
+    if (timeRange === 'all') return prices;
 
-  if (timeRange === 'all') return prices;
+    const today = new Date();
+    const cutoffDate = new Date();
+    cutoffDate.setFullYear(today.getFullYear() - timeRange);
 
-  const today = new Date();
-  const cutoffDate = new Date();
-  cutoffDate.setFullYear(today.getFullYear() - timeRange);
-
-  return prices.filter((price) => {
-    const priceDate = new Date(price.date);
-    return priceDate >= cutoffDate;
-  });
+    return prices.filter((price) => {
+      const priceDate = new Date(price.date);
+      return priceDate >= cutoffDate;
+    });
+  }, [prices, timeRange]);
 };

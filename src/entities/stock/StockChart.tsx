@@ -3,7 +3,7 @@
  * Interactive chart with news markers using Chart.js
  */
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -55,10 +55,9 @@ export const StockChart: React.FC<StockChartProps> = ({
   const chartRef = useRef<ChartJS<'line'>>(null);
   // Use ref instead of state to avoid re-renders that reset zoom
   const hoveredNewsIdRef = useRef<number | null>(null);
+  const highlightedNewsIdRef = useRef<number | null>(highlightedNewsId ?? null);
+  const prevHighlightedIdRef = useRef<number | null>(null);
 
-  // Prepare chart data
-  const dates = prices.map((p) => p.date);
-  const closePrices = prices.map((p) => p.close);
 
   // Base and enlarged sizes
   const baseSize = 24;
@@ -89,8 +88,25 @@ export const StockChart: React.FC<StockChartProps> = ({
     chart.update('none'); // Update without animation to preserve zoom
   }, []);
 
-  // Create news annotations (markers on chart)
-  const newsAnnotations: Record<string, any> = {};
+  // Keep ref in sync with prop (used in memoized handlers)
+  useEffect(() => {
+    highlightedNewsIdRef.current = highlightedNewsId ?? null;
+  }, [highlightedNewsId]);
+
+  // Handle highlight changes imperatively - no chart options rebuild, no zoom reset
+  useEffect(() => {
+    if (prevHighlightedIdRef.current !== null) {
+      updateAnnotationSize(prevHighlightedIdRef.current, false);
+    }
+    if (highlightedNewsId != null) {
+      updateAnnotationSize(highlightedNewsId, true);
+    }
+    prevHighlightedIdRef.current = highlightedNewsId ?? null;
+  }, [highlightedNewsId, updateAnnotationSize]);
+
+  // Create news annotations (markers on chart) - memoized, no highlightedNewsId dependency
+  const newsAnnotations = useMemo(() => {
+  const annotations: Record<string, any> = {};
 
   news.forEach((newsItem, index) => {
     // Find nearest price date for this news
@@ -104,38 +120,29 @@ export const StockChart: React.FC<StockChartProps> = ({
     const isPositive = newsItem.sentiment > 0;
     const color = isPositive ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)';
 
-    // Only check highlightedNewsId for initial render (clicked state from parent)
-    const isHighlighted = highlightedNewsId === newsItem.id;
-    const currentSize = isHighlighted ? baseSize * scale : baseSize;
-    const currentFontSize = isHighlighted ? baseFontSize * scale : baseFontSize;
-    const currentPadding = isHighlighted ? basePadding * scale : basePadding;
-
-    newsAnnotations[`news${newsItem.id}`] = {
+    annotations[`news${newsItem.id}`] = {
       type: 'label',
       xValue: nearestPrice.date,
       yValue: nearestPrice.close,
       backgroundColor: color,
-      borderColor: isHighlighted ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)',
-      borderWidth: isHighlighted ? 3 : 2,
+      borderColor: 'rgba(255, 255, 255, 0.8)',
+      borderWidth: 2,
       borderRadius: 50,
       color: '#fff',
       content: (index + 1).toString(),
       font: {
-        size: currentFontSize,
+        size: baseFontSize,
         weight: 'bold',
       },
-      padding: currentPadding,
-      width: currentSize,
-      height: currentSize,
-      // Limit hover detection area to ~50% around the dot (radius + 50%)
-      hitRadius: currentSize * 0.75, // 50% extra around the dot
-      // Hover handlers - update directly without React state
+      padding: basePadding,
+      width: baseSize,
+      height: baseSize,
+      hitRadius: baseSize * 0.75,
       enter: () => {
         if (chartRef.current?.canvas) {
           chartRef.current.canvas.style.cursor = 'pointer';
         }
-        // Only enlarge if not already highlighted
-        if (highlightedNewsId !== newsItem.id) {
+        if (highlightedNewsIdRef.current !== newsItem.id) {
           hoveredNewsIdRef.current = newsItem.id;
           updateAnnotationSize(newsItem.id, true);
         }
@@ -144,8 +151,7 @@ export const StockChart: React.FC<StockChartProps> = ({
         if (chartRef.current?.canvas) {
           chartRef.current.canvas.style.cursor = 'default';
         }
-        // Only shrink if not highlighted
-        if (highlightedNewsId !== newsItem.id) {
+        if (highlightedNewsIdRef.current !== newsItem.id) {
           hoveredNewsIdRef.current = null;
           updateAnnotationSize(newsItem.id, false);
         }
@@ -156,24 +162,27 @@ export const StockChart: React.FC<StockChartProps> = ({
     };
   });
 
-  const chartData = {
-    labels: dates,
+  return annotations;
+  }, [news, prices, updateAnnotationSize, onNewsClick]);
+
+  const chartData = useMemo(() => ({
+    labels: prices.map((p) => p.date),
     datasets: [
       {
         label: 'Schlusskurs',
-        data: closePrices,
+        data: prices.map((p) => p.close),
         borderColor: 'rgba(59, 130, 246, 1)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 2,
         fill: true,
         tension: 0,
         pointRadius: 0,
-        pointHoverRadius: 0, // Disabled to prioritize news dots
+        pointHoverRadius: 0,
       },
     ],
-  };
+  }), [prices]);
 
-  const chartOptions: any = {
+  const chartOptions: any = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -246,10 +255,10 @@ export const StockChart: React.FC<StockChartProps> = ({
         bottom: 15,
       },
     },
-  };
+  }), [newsAnnotations]);
 
   return (
-    <div className="w-full h-[500px]">
+    <div className="w-full h-[400px]">
       <Line ref={chartRef} data={chartData} options={chartOptions} />
     </div>
   );

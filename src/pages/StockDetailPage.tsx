@@ -3,7 +3,7 @@
  * EXACT design from original frontend with dark theme
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useStockData, useFilteredPrices } from '@/entities/stock/queries';
@@ -59,7 +59,7 @@ export const StockDetailPage = () => {
     : null;
 
   // Scroll to news when clicked - scroll page to H1, scroll news item within news box
-  const handleNewsClick = (newsId: number) => {
+  const handleNewsClick = useCallback((newsId: number) => {
     // Highlight the clicked news item
     setHighlightedNewsId(newsId);
 
@@ -83,7 +83,7 @@ export const StockDetailPage = () => {
         newsSection.scrollTo({ top: scrollTop, behavior: 'smooth' });
       }, 100); // Small delay to let page scroll happen first
     }
-  };
+  }, []);
 
   // Handle add/update user news
   const handleAddUserNews = async (data: {
@@ -423,7 +423,7 @@ export const StockDetailPage = () => {
             {/* Chart Container - Exact original styling */}
             <div style={{
               position: 'relative',
-              height: '500px',
+              height: '400px',
               background: 'var(--background)',
               padding: '20px',
               borderRadius: '8px',
@@ -438,23 +438,6 @@ export const StockDetailPage = () => {
               />
             </div>
 
-            {/* Chart Controls - Original styling */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: '15px',
-              padding: '10px',
-              background: 'var(--background)',
-              borderRadius: '6px'
-            }}>
-              <span style={{
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary)'
-              }}>
-                💡 Scrollen zum Zoomen, Ziehen zum Verschieben
-              </span>
-            </div>
 
             {/* Disclaimer - Directly under chart */}
             <div style={{
