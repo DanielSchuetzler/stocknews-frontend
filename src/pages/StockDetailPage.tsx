@@ -279,7 +279,7 @@ export const StockDetailPage = () => {
         <meta name="twitter:description" content={ogDescription} />
         <meta name="twitter:image" content="https://stocknewspulse.info/og-image.png" />
 
-        {/* Structured Data */}
+        {/* Structured Data  */}
         <script type="application/ld+json">{JSON.stringify(stockJsonLd)}</script>
       </Helmet>
 
