@@ -44,6 +44,8 @@ interface StockChartProps {
   onNewsClick?: (newsId: number) => void;
   highlightedNewsId?: number | null;
   fairValueData?: FairValueDataPoint[];
+  showNews?: boolean;
+  showFairValue?: boolean;
 }
 
 export const StockChart: React.FC<StockChartProps> = ({
@@ -53,6 +55,8 @@ export const StockChart: React.FC<StockChartProps> = ({
   onNewsClick,
   highlightedNewsId,
   fairValueData,
+  showNews = true,
+  showFairValue = true,
 }) => {
   const chartRef = useRef<ChartJS<'line'>>(null);
   // Use ref instead of state to avoid re-renders that reset zoom
@@ -62,10 +66,10 @@ export const StockChart: React.FC<StockChartProps> = ({
 
 
   // Base and enlarged sizes
-  const baseSize = 24;
-  const baseFontSize = 12;
-  const basePadding = 6;
-  const scale = 1.3; // 130%
+  const baseSize = 22;
+  const baseFontSize = 11;
+  const basePadding = 5;
+  const scale = 1.35; // 135%
 
   // Function to update annotation size directly without re-render
   const updateAnnotationSize = useCallback((newsId: number, enlarged: boolean) => {
@@ -84,8 +88,8 @@ export const StockChart: React.FC<StockChartProps> = ({
     annotation.height = newSize;
     annotation.padding = newPadding;
     annotation.font = { size: newFontSize, weight: 'bold' };
-    annotation.borderWidth = enlarged ? 3 : 2;
-    annotation.borderColor = enlarged ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)';
+    annotation.borderWidth = enlarged ? 2 : 1.5;
+    annotation.borderColor = enlarged ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)';
 
     chart.update('none'); // Update without animation to preserve zoom
   }, []);
@@ -120,15 +124,15 @@ export const StockChart: React.FC<StockChartProps> = ({
     });
 
     const isPositive = newsItem.sentiment > 0;
-    const color = isPositive ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+    const color = isPositive ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)';
 
     annotations[`news${newsItem.id}`] = {
       type: 'label',
       xValue: nearestPrice.date,
       yValue: nearestPrice.close,
       backgroundColor: color,
-      borderColor: 'rgba(255, 255, 255, 0.8)',
-      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.5)',
+      borderWidth: 1.5,
       borderRadius: 50,
       color: '#fff',
       content: (index + 1).toString(),
@@ -183,8 +187,8 @@ export const StockChart: React.FC<StockChartProps> = ({
       },
     ];
 
-    // Add Fair Value dataset if data is available
-    if (fairValueData && fairValueData.length > 0 && prices.length > 0) {
+    // Add Fair Value dataset if data is available and visible
+    if (showFairValue && fairValueData && fairValueData.length > 0 && prices.length > 0) {
       const firstPriceDate = new Date(prices[0].date);
       const lastPriceDate = new Date(prices[prices.length - 1].date);
 
@@ -278,7 +282,7 @@ export const StockChart: React.FC<StockChartProps> = ({
       labels: prices.map((p) => p.date),
       datasets,
     };
-  }, [prices, fairValueData]);
+  }, [prices, fairValueData, showFairValue]);
 
   const chartOptions: any = useMemo(() => ({
     responsive: true,
@@ -337,7 +341,7 @@ export const StockChart: React.FC<StockChartProps> = ({
         },
       },
       annotation: {
-        annotations: newsAnnotations,
+        annotations: showNews ? newsAnnotations : {},
       },
       zoom: {
         pan: {
@@ -390,11 +394,41 @@ export const StockChart: React.FC<StockChartProps> = ({
         bottom: 15,
       },
     },
-  }), [newsAnnotations]);
+  }), [newsAnnotations, showNews]);
+
+  // Custom plugin: re-draw fair value dataset in afterDraw so it renders on the
+  // highest layer — above news annotation dots and the stock price line.
+  const fairValueOnTopPlugin = useMemo(() => ({
+    id: 'fairValueOnTop',
+    afterDraw(chart: any) {
+      if (chart.data.datasets.length <= 1) return; // only stock price, no fair value
+      const fvIndex = chart.data.datasets.length - 1;
+      const meta = chart.getDatasetMeta(fvIndex);
+      if (!meta || meta.hidden) return;
+
+      const ctx = chart.ctx;
+      const area = chart.chartArea;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+      ctx.clip();
+
+      // Redraw line
+      if (meta.dataset) {
+        meta.dataset.draw(ctx, area);
+      }
+      // Redraw points (diamond markers)
+      meta.data.forEach((point: any) => {
+        point.draw(ctx, area);
+      });
+
+      ctx.restore();
+    },
+  }), []);
 
   return (
     <div className="w-full h-[400px]">
-      <Line ref={chartRef} data={chartData} options={chartOptions} />
+      <Line ref={chartRef} data={chartData} options={chartOptions} plugins={[fairValueOnTopPlugin]} />
     </div>
   );
 };

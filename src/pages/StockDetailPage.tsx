@@ -36,6 +36,8 @@ export const StockDetailPage = () => {
     url?: string;
   } | null>(null);
   const [highlightedNewsId, setHighlightedNewsId] = useState<number | null>(null);
+  const [showNewsOnChart, setShowNewsOnChart] = useState(true);
+  const [showFairValueOnChart, setShowFairValueOnChart] = useState(true);
 
   // Fetch data
   const { data: stockData, isLoading: stockLoading, error: stockError } = useStockData(ticker || '');
@@ -474,13 +476,20 @@ export const StockDetailPage = () => {
                 onNewsClick={handleNewsClick}
                 highlightedNewsId={highlightedNewsId}
                 fairValueData={fairValueData?.dataPoints}
+                showNews={showNewsOnChart}
+                showFairValue={showFairValueOnChart}
               />
             </div>
 
 
             {/* Fair Value Explanation - Below chart */}
             {fairValueData?.explanation && (
-              <FairValueExplanation explanation={fairValueData.explanation} dataPoints={fairValueData.dataPoints} />
+              <FairValueExplanation
+                explanation={fairValueData.explanation}
+                dataPoints={fairValueData.dataPoints}
+                showOnChart={showFairValueOnChart}
+                onToggleChart={() => setShowFairValueOnChart(v => !v)}
+              />
             )}
 
           </div>
@@ -496,9 +505,38 @@ export const StockDetailPage = () => {
               gap: '1rem',
               flexWrap: 'wrap'
             }}>
-              <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>
-                News & Events
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>
+                  News & Events
+                </h2>
+                <button
+                  onClick={() => setShowNewsOnChart(v => !v)}
+                  title={showNewsOnChart ? 'News im Chart ausblenden' : 'News im Chart einblenden'}
+                  style={{
+                    background: 'none',
+                    border: '1px solid var(--border-color, #374151)',
+                    borderRadius: '6px',
+                    padding: '0.3rem 0.5rem',
+                    cursor: 'pointer',
+                    color: showNewsOnChart ? 'var(--text-primary, #f3f4f6)' : 'var(--text-muted, #6b7280)',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    opacity: showNewsOnChart ? 1 : 0.5,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {showNewsOnChart ? (
+                      <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-4.879-4.879" />
+                    )}
+                  </svg>
+                  Chart
+                </button>
+              </div>
 
               {isAuthenticated && (
                 <button
