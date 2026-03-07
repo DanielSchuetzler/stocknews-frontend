@@ -6,10 +6,11 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useStockData, useFilteredPrices } from '@/entities/stock/queries';
+import { useStockData, useFilteredPrices, useFairValue } from '@/entities/stock/queries';
 import { useCompany } from '@/entities/company/queries';
 import { useNews, useUserNews, useCreateUserNews, useUpdateUserNews, useDeleteUserNews } from '@/entities/news/queries';
 import { StockChart } from '@/entities/stock/StockChart';
+import { FairValueExplanation } from '@/entities/stock/FairValueExplanation';
 import { NewsList } from '@/entities/news/NewsList';
 import { FavoriteButton } from '@/features/favorites/FavoriteButton';
 import { AddUserNewsModal } from '@/features/news/AddUserNewsModal';
@@ -41,6 +42,7 @@ export const StockDetailPage = () => {
   const { data: company } = useCompany(ticker || '');
   const { data: aiNewsData = [] } = useNews(ticker || '');
   const { data: userNewsData = [] } = useUserNews(ticker || '', { enabled: isAuthenticated });
+  const { data: fairValueData } = useFairValue(ticker || '');
 
   // Mutations for user news
   const createUserNews = useCreateUserNews();
@@ -328,10 +330,46 @@ export const StockDetailPage = () => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aktueller Kurs:</span>
-              <span style={{ color: 'var(--success-color)', fontWeight: 700, fontSize: '1.1rem' }}>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem' }}>
                 {currentPrice ? `${currentPrice.toFixed(2)} ${stockData.currency === 'USD' ? '$' : stockData.currency}` : 'N/A'}
               </span>
             </div>
+            {/* Fair Value in header */}
+            {fairValueData?.explanation?.fairValueCombined != null && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Fair Value:</span>
+                <span style={{ color: 'rgba(139, 92, 246, 1)', fontWeight: 700, fontSize: '1.1rem' }}>
+                  {fairValueData.explanation.fairValueCombined.toFixed(2)} {stockData.currency === 'USD' ? '$' : stockData.currency}
+                </span>
+              </div>
+            )}
+            {/* Verdict badge: over/under/fair valued */}
+            {fairValueData?.explanation?.fairValueCombined != null && currentPrice != null && (() => {
+              const fv = fairValueData.explanation.fairValueCombined!;
+              const distancePercent = ((currentPrice - fv) / fv) * 100;
+              const absDistance = Math.abs(distancePercent);
+              const isFairlyValued = absDistance <= 2;
+              const verdictText = isFairlyValued ? 'fair bewertet' : distancePercent > 0 ? 'überbewertet' : 'unterbewertet';
+              const verdictBg = isFairlyValued
+                ? 'var(--text-primary, #f3f4f6)'
+                : distancePercent > 0
+                  ? 'var(--danger-color, #ef4444)'
+                  : 'var(--success-color, #10b981)';
+              const verdictTextColor = isFairlyValued ? '#111827' : '#fff';
+              return (
+                <span style={{
+                  padding: '0.25rem 0.7rem',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: verdictTextColor,
+                  background: verdictBg,
+                  alignSelf: 'center',
+                }}>
+                  {verdictText} ({distancePercent > 0 ? '+' : ''}{distancePercent.toFixed(1)}%)
+                </span>
+              );
+            })()}
           </div>
 
           {/* Favorite Button - small and subtle */}
@@ -435,41 +473,16 @@ export const StockDetailPage = () => {
                 currency={stockData.currency}
                 onNewsClick={handleNewsClick}
                 highlightedNewsId={highlightedNewsId}
+                fairValueData={fairValueData?.dataPoints}
               />
             </div>
 
 
-            {/* Disclaimer - Directly under chart */}
-            <div style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              padding: '1rem 1.5rem',
-              marginTop: '20px',
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'start'
-            }}>
-              <svg
-                style={{ width: '20px', height: '20px', color: 'var(--danger-color)', flexShrink: 0, marginTop: '2px' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-                <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              <div>
-                <p style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.25rem' }}>
-                  Wichtiger Hinweis:
-                </p>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>
-                  Diese Informationen dienen ausschließlich zu Bildungszwecken und stellen keine
-                  Anlageberatung dar. Alle Investitionsentscheidungen erfolgen auf eigene Verantwortung.
-                </p>
-              </div>
-            </div>
+            {/* Fair Value Explanation - Below chart */}
+            {fairValueData?.explanation && (
+              <FairValueExplanation explanation={fairValueData.explanation} dataPoints={fairValueData.dataPoints} />
+            )}
+
           </div>
 
           {/* News Section - Scrollable on desktop */}
@@ -603,6 +616,32 @@ export const StockDetailPage = () => {
               canDelete={newsType === 'user'}
               highlightedId={highlightedNewsId}
             />
+
+            {/* Disclaimer */}
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '8px',
+              padding: '0.75rem 1rem',
+              marginTop: '20px',
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'start'
+            }}>
+              <svg
+                style={{ width: '16px', height: '16px', color: 'var(--danger-color)', flexShrink: 0, marginTop: '2px' }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.4', margin: 0 }}>
+                <strong style={{ color: 'var(--text-primary)' }}>Hinweis:</strong> Diese Informationen dienen ausschließlich zu Bildungszwecken und stellen keine Anlageberatung dar. Alle Investitionsentscheidungen erfolgen auf eigene Verantwortung.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -702,10 +741,6 @@ export const StockDetailPage = () => {
           }
 
           .chart-section {
-            position: sticky;
-            top: 20px;
-            max-height: calc(100vh - 40px);
-            overflow: hidden;
           }
 
           .news-section {

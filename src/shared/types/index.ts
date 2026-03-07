@@ -8,3 +8,4 @@ export * from './stock';
 export * from './company';
 export * from './news';
 export * from './favorite';
+export * from './fairValue';

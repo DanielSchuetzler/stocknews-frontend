@@ -20,6 +20,8 @@ export const ENDPOINTS = {
   STOCKS: {
     GET_BY_TICKER: (ticker: string, refresh?: boolean) =>
       `/stocks/${ticker}${refresh ? '?refresh=true' : ''}`,
+    FAIR_VALUE: (ticker: string, refresh?: boolean) =>
+      `/stocks/${ticker}/fair-value${refresh ? '?refresh=true' : ''}`,
   },
 
   // Company endpoints (/api/companies)

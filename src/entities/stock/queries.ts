@@ -5,13 +5,14 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchStockData } from './api';
+import { fetchStockData, fetchFairValue } from './api';
 import type { TimeRange, StockPrice } from '@/shared/types';
 
 // Query keys for cache management
 export const stockKeys = {
   all: ['stock'] as const,
   detail: (ticker: string) => [...stockKeys.all, ticker] as const,
+  fairValue: (ticker: string) => [...stockKeys.all, 'fairValue', ticker] as const,
 };
 
 /**
@@ -31,6 +32,21 @@ export const useStockData = (ticker: string, refresh: boolean = false) => {
 };
 
 /**
+ * Hook to fetch Fair Value data for a ticker
+ * Caches data for 30 minutes (backend has 24h cache)
+ * @param ticker - Stock ticker symbol
+ */
+export const useFairValue = (ticker: string) => {
+  return useQuery({
+    queryKey: stockKeys.fairValue(ticker),
+    queryFn: () => fetchFairValue(ticker),
+    enabled: !!ticker,
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1,
+  });
+};
+
+/**
  * Hook to filter stock prices by time range
  * Pure client-side filtering (no API call)
  */
@@ -42,9 +58,12 @@ export const useFilteredPrices = (
     if (!prices || prices.length === 0) return [];
     if (timeRange === 'all') return prices;
 
+    // Start from January 1st of the cutoff year so the chart always
+    // begins at a full year boundary — this ensures Fair Value annual
+    // data points align with the visible price range.
     const today = new Date();
-    const cutoffDate = new Date();
-    cutoffDate.setFullYear(today.getFullYear() - timeRange);
+    const cutoffYear = today.getFullYear() - timeRange;
+    const cutoffDate = new Date(cutoffYear, 0, 1); // Jan 1st
 
     return prices.filter((price) => {
       const priceDate = new Date(price.date);

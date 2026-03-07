@@ -20,7 +20,7 @@ import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import zoomPlugin from 'chartjs-plugin-zoom';
-import type { StockPrice, NewsItem } from '@/shared/types';
+import type { StockPrice, NewsItem, FairValueDataPoint } from '@/shared/types';
 
 // Register Chart.js components
 ChartJS.register(
@@ -43,6 +43,7 @@ interface StockChartProps {
   currency?: string;
   onNewsClick?: (newsId: number) => void;
   highlightedNewsId?: number | null;
+  fairValueData?: FairValueDataPoint[];
 }
 
 export const StockChart: React.FC<StockChartProps> = ({
@@ -51,6 +52,7 @@ export const StockChart: React.FC<StockChartProps> = ({
   currency: _currency = 'USD',
   onNewsClick,
   highlightedNewsId,
+  fairValueData,
 }) => {
   const chartRef = useRef<ChartJS<'line'>>(null);
   // Use ref instead of state to avoid re-renders that reset zoom
@@ -165,9 +167,8 @@ export const StockChart: React.FC<StockChartProps> = ({
   return annotations;
   }, [news, prices, updateAnnotationSize, onNewsClick]);
 
-  const chartData = useMemo(() => ({
-    labels: prices.map((p) => p.date),
-    datasets: [
+  const chartData = useMemo(() => {
+    const datasets: any[] = [
       {
         label: 'Schlusskurs',
         data: prices.map((p) => p.close),
@@ -177,17 +178,115 @@ export const StockChart: React.FC<StockChartProps> = ({
         fill: true,
         tension: 0,
         pointRadius: 0,
-        pointHoverRadius: 0,
+        pointHoverRadius: 5,
+        pointHitRadius: 10,
       },
-    ],
-  }), [prices]);
+    ];
+
+    // Add Fair Value dataset if data is available
+    if (fairValueData && fairValueData.length > 0 && prices.length > 0) {
+      const firstPriceDate = new Date(prices[0].date);
+      const lastPriceDate = new Date(prices[prices.length - 1].date);
+
+      // Get all valid fair value data points (no date filter — we handle range via extension)
+      const validFvData = fairValueData.filter((fv) => fv.fairValueCombined != null);
+
+      // Find the fair value points that fall within or closest to the visible price range
+      // Include points within range AND the nearest point before/after for proper interpolation
+      const fvInRange = validFvData.filter((fv) => {
+        const fvDate = new Date(fv.date);
+        return fvDate >= firstPriceDate && fvDate <= lastPriceDate;
+      });
+
+      // Also include the closest point before the range (for backward extension reference)
+      const fvBeforeRange = validFvData
+        .filter((fv) => new Date(fv.date) < firstPriceDate)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      // Also include points slightly after the range (current fair value at today's date)
+      const fvAfterRange = validFvData
+        .filter((fv) => new Date(fv.date) > lastPriceDate)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      // Merge: all in-range + first after-range (today's current fair value)
+      const relevantFv = [
+        ...fvInRange,
+        ...(fvAfterRange.length > 0 ? [fvAfterRange[0]] : []),
+      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      if (relevantFv.length > 0) {
+        // Build the chart points from relevant fair value data
+        const fairValuePoints = relevantFv.map((fv) => ({
+          x: fv.date,
+          y: fv.fairValueCombined as number,
+          isExtension: false,
+          fiscalYear: fv.fiscalYear,
+        }));
+
+        // Extend backward: add a point at the first stock price date
+        // using the earliest available fair value (flat extrapolation)
+        const firstFvDate = new Date(fairValuePoints[0].x);
+        if (firstFvDate > firstPriceDate) {
+          // Use the closest point before range if available, otherwise use first in-range value
+          const backValue = fvBeforeRange.length > 0
+            ? fvBeforeRange[0].fairValueCombined as number
+            : fairValuePoints[0].y;
+          const backFY = fvBeforeRange.length > 0
+            ? fvBeforeRange[0].fiscalYear
+            : fairValuePoints[0].fiscalYear;
+          fairValuePoints.unshift({
+            x: prices[0].date,
+            y: backValue,
+            isExtension: true,
+            fiscalYear: backFY,
+          });
+        }
+
+        // Extend forward: add a point at the last stock price date
+        // using the latest fair value (flat extrapolation to today)
+        const lastFvDate = new Date(fairValuePoints[fairValuePoints.length - 1].x);
+        if (lastFvDate < lastPriceDate) {
+          fairValuePoints.push({
+            x: prices[prices.length - 1].date,
+            y: fairValuePoints[fairValuePoints.length - 1].y,
+            isExtension: true,
+            fiscalYear: fairValuePoints[fairValuePoints.length - 1].fiscalYear,
+          });
+        }
+
+        datasets.push({
+          label: 'Fair Value (berechnet)',
+          data: fairValuePoints.map((p) => ({ x: p.x, y: p.y })),
+          borderColor: 'rgba(139, 92, 246, 1)',          // Purple
+          backgroundColor: 'rgba(139, 92, 246, 0.15)',
+          borderWidth: 2,
+          borderDash: [8, 4],                              // Dashed line
+          fill: false,
+          tension: 0.3,                                    // Slight curve between annual points
+          pointRadius: fairValuePoints.map((p) => p.isExtension ? 0 : 6),
+          pointHoverRadius: fairValuePoints.map((p) => p.isExtension ? 4 : 8),
+          pointBackgroundColor: 'rgba(139, 92, 246, 1)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointStyle: 'rectRot',                           // Diamond markers
+          spanGaps: true,
+        });
+      }
+    }
+
+    return {
+      labels: prices.map((p) => p.date),
+      datasets,
+    };
+  }, [prices, fairValueData]);
 
   const chartOptions: any = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
-      mode: 'index',
-      intersect: false,
+      mode: 'nearest',
+      intersect: true,
+      axis: 'xy',
     },
     plugins: {
       legend: {
@@ -199,7 +298,43 @@ export const StockChart: React.FC<StockChartProps> = ({
         },
       },
       tooltip: {
-        enabled: false, // Disabled to prioritize news dots interaction
+        enabled: true,
+        mode: 'nearest',
+        intersect: true,
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        titleColor: '#f3f4f6',
+        bodyColor: '#d1d5db',
+        borderColor: 'rgba(139, 92, 246, 0.5)',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 6,
+        displayColors: true,
+        callbacks: {
+          title: (items: any[]) => {
+            if (!items.length) return '';
+            const raw = items[0].raw;
+            // For {x, y} format (fair value), format the date
+            if (raw && typeof raw === 'object' && raw.x) {
+              return new Date(raw.x).toLocaleDateString('de-DE', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+              });
+            }
+            // For regular labels (stock price)
+            const label = items[0].label;
+            if (label) {
+              return new Date(label).toLocaleDateString('de-DE', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+              });
+            }
+            return '';
+          },
+          label: (item: any) => {
+            const value = item.raw?.y ?? item.raw;
+            if (value == null) return '';
+            const label = item.dataset.label || '';
+            return ` ${label}: ${Number(value).toFixed(2)}`;
+          },
+        },
       },
       annotation: {
         annotations: newsAnnotations,
