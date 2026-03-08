@@ -19,7 +19,7 @@ export interface FairValueExplanation {
   // Combined result
   fairValueCombined: number | null;
   currentPrice: number | null;
-  valuationVerdict: string | null;   // "unterbewertet" | "überbewertet" | "fair bewertet"
+  valuationVerdict: string | null;   // "unter Fair Value gehandelt" | "über Fair Value gehandelt" | "fair gehandelt"
   upsidePercent: number | null;
 
   // Input data

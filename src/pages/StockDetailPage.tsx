@@ -330,49 +330,138 @@ export const StockDetailPage = () => {
                 {stockData.currency}
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aktueller Kurs:</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem' }}>
-                {currentPrice ? `${currentPrice.toFixed(2)} ${stockData.currency === 'USD' ? '$' : stockData.currency}` : 'N/A'}
-              </span>
-            </div>
-            {/* Fair Value in header */}
-            {fairValueData?.explanation?.fairValueCombined != null && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Fair Value:</span>
-                <span style={{ color: 'rgba(139, 92, 246, 1)', fontWeight: 700, fontSize: '1.1rem' }}>
-                  {fairValueData.explanation.fairValueCombined.toFixed(2)} {stockData.currency === 'USD' ? '$' : stockData.currency}
-                </span>
-              </div>
-            )}
-            {/* Verdict badge: over/under/fair valued */}
-            {fairValueData?.explanation?.fairValueCombined != null && currentPrice != null && (() => {
-              const fv = fairValueData.explanation.fairValueCombined!;
-              const distancePercent = ((currentPrice - fv) / fv) * 100;
-              const absDistance = Math.abs(distancePercent);
-              const isFairlyValued = absDistance <= 2;
-              const verdictText = isFairlyValued ? 'fair bewertet' : distancePercent > 0 ? 'überbewertet' : 'unterbewertet';
-              const verdictBg = isFairlyValued
-                ? 'var(--text-primary, #f3f4f6)'
-                : distancePercent > 0
-                  ? 'var(--danger-color, #ef4444)'
-                  : 'var(--success-color, #10b981)';
-              const verdictTextColor = isFairlyValued ? '#111827' : '#fff';
-              return (
-                <span style={{
-                  padding: '0.25rem 0.7rem',
-                  borderRadius: '4px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  color: verdictTextColor,
-                  background: verdictBg,
-                  alignSelf: 'center',
-                }}>
-                  {verdictText} ({distancePercent > 0 ? '+' : ''}{distancePercent.toFixed(1)}%)
-                </span>
-              );
-            })()}
           </div>
+
+          {/* Valuation Indicator — Kurs → Fair Value with arrow and verdict */}
+          {currentPrice != null && (() => {
+            const hasFV = fairValueData?.explanation?.fairValueCombined != null;
+            const fv = hasFV ? fairValueData!.explanation.fairValueCombined! : null;
+            const verdict = fairValueData?.explanation?.valuationVerdict;
+            const upside = fairValueData?.explanation?.upsidePercent;
+            const isUnder = verdict === 'unter Fair Value gehandelt';
+            const isOver = verdict === 'über Fair Value gehandelt';
+            const isFair = !isUnder && !isOver;
+            const accentColor = isUnder ? '#10b981' : isOver ? '#ef4444' : '#8b5cf6';
+            const accentRgb = isUnder ? '16,185,129' : isOver ? '239,68,68' : '139,92,246';
+            const currSym = stockData.currency === 'USD' ? '$' : stockData.currency;
+
+            if (!hasFV) {
+              return (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0.75rem 1.25rem',
+                  background: 'var(--surface)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aktueller Kurs:</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem' }}>
+                      {currentPrice.toFixed(2)} {currSym}
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0',
+                padding: '0.5rem 1rem',
+                background: `linear-gradient(135deg, rgba(${accentRgb}, 0.06), rgba(${accentRgb}, 0.02))`,
+                borderRadius: '10px',
+                border: `1px solid rgba(${accentRgb}, 0.2)`,
+              }}>
+                {/* Current Price */}
+                <div style={{ textAlign: 'center', minWidth: '65px' }}>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
+                    Kurs
+                  </div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f3f4f6)' }}>
+                    {currentPrice.toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
+                </div>
+
+                {/* Arrow connector with percentage */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '0 0.6rem',
+                  minWidth: '80px',
+                  flex: '0 1 auto',
+                }}>
+                  {/* Percentage pill */}
+                  <div style={{
+                    padding: '0.15rem 0.55rem',
+                    borderRadius: '20px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: isFair ? '#111827' : '#fff',
+                    background: accentColor,
+                    whiteSpace: 'nowrap',
+                    marginBottom: '0.25rem',
+                    lineHeight: 1.4,
+                  }}>
+                    {isUnder ? '\u2197' : isOver ? '\u2198' : '\u2192'}{' '}
+                    {upside != null && (upside > 0 ? '+' : '')}{upside}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''}
+                  </div>
+
+                  {/* Gradient arrow line */}
+                  <div style={{
+                    width: '100%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, var(--text-muted, #6b7280), ${accentColor})`,
+                    position: 'relative',
+                    borderRadius: '1px',
+                    marginBottom: '0.25rem',
+                  }}>
+                    {/* Left dot */}
+                    <div style={{
+                      position: 'absolute', left: '-2px', top: '-2px',
+                      width: '6px', height: '6px', borderRadius: '50%',
+                      background: 'var(--text-muted, #6b7280)',
+                    }} />
+                    {/* Right arrow head */}
+                    <div style={{
+                      position: 'absolute', right: '-1px', top: '-3px',
+                      width: '0', height: '0',
+                      borderTop: '4px solid transparent',
+                      borderBottom: '4px solid transparent',
+                      borderLeft: `6px solid ${accentColor}`,
+                    }} />
+                  </div>
+
+                  {/* Verdict label */}
+                  <div style={{
+                    fontSize: '0.55rem',
+                    color: accentColor,
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {verdict}
+                  </div>
+                </div>
+
+                {/* Fair Value */}
+                <div style={{ textAlign: 'center', minWidth: '65px' }}>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
+                    Fair Value
+                  </div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: accentColor }}>
+                    {fv!.toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Favorite Button - small and subtle */}
           <div style={{ marginLeft: 'auto' }}>
@@ -784,6 +873,12 @@ export const StockDetailPage = () => {
           .news-section {
             max-height: calc(100vh - 40px);
             overflow-y: auto;
+          }
+        }
+
+        @media (min-width: 1400px) {
+          .main-content-wrapper {
+            grid-template-columns: 1fr clamp(420px, 30vw, 550px) !important;
           }
         }
 
