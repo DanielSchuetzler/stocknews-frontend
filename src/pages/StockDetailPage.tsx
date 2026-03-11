@@ -400,14 +400,14 @@ export const StockDetailPage = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   padding: '0 0.6rem',
-                  minWidth: '80px',
+                  minWidth: '90px',
                   flex: '0 1 auto',
                 }}>
                   {/* Percentage pill */}
                   <div style={{
-                    padding: '0.15rem 0.55rem',
+                    padding: '0.2rem 0.6rem',
                     borderRadius: '20px',
-                    fontSize: '0.7rem',
+                    fontSize: '0.85rem',
                     fontWeight: 700,
                     color: isFair ? '#111827' : '#fff',
                     background: accentColor,
@@ -415,7 +415,6 @@ export const StockDetailPage = () => {
                     marginBottom: '0.25rem',
                     lineHeight: 1.4,
                   }}>
-                    {isUnder ? '\u2197' : isOver ? '\u2198' : '\u2192'}{' '}
                     {upside != null && (upside > 0 ? '+' : '')}{upside}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''}
                   </div>
 
@@ -446,7 +445,7 @@ export const StockDetailPage = () => {
 
                   {/* Verdict label */}
                   <div style={{
-                    fontSize: '0.55rem',
+                    fontSize: '0.7rem',
                     color: accentColor,
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -578,6 +577,29 @@ export const StockDetailPage = () => {
               />
             </div>
 
+            {/* Stock price data source attribution */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.35rem 0.5rem 0',
+              fontSize: '0.65rem',
+              color: 'var(--text-muted, #6b7280)',
+              opacity: 0.7,
+            }}>
+              <span>Kursdaten:</span>
+              <a
+                href="https://finance.yahoo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'rgba(139, 92, 246, 0.7)', textDecoration: 'none' }}
+              >
+                Yahoo Finance
+              </a>
+              <span>·</span>
+              <span>Abruf: {new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+            </div>
 
             {/* Fair Value Explanation - Below chart */}
             {fairValueData?.explanation && (

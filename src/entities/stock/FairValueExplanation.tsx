@@ -577,6 +577,62 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
             typische Bewertungsniveaus aufweisen. Sie ersetzt keine professionelle Aktienanalyse
             und stellt keine Anlageempfehlung dar.
           </div>
+
+          {/* Data Source Attribution */}
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.75rem 1rem',
+            background: 'var(--background, #111827)',
+            border: '1px solid var(--border-color, #374151)',
+            borderRadius: '6px',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted, #6b7280)',
+            lineHeight: 1.7,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <strong style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.8rem' }}>Datenquellen</strong>
+            </div>
+            <div style={{ marginLeft: '0.25rem' }}>
+              <div style={{ marginBottom: '0.35rem' }}>
+                <strong style={{ color: 'var(--text-secondary, #9ca3af)' }}>Fundamentaldaten &amp; Aktienkurse:</strong>{' '}
+                <a
+                  href="https://finance.yahoo.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'rgba(139, 92, 246, 0.8)', textDecoration: 'underline' }}
+                >
+                  Yahoo Finance
+                </a>{' '}
+                — bereitgestellt über die Yahoo Finance API.
+              </div>
+              <div style={{ marginBottom: '0.35rem' }}>
+                Die Daten (EPS, Free Cash Flow, Wachstumsraten, Aktienkurse etc.) werden bei jedem Seitenaufruf
+                automatisch abgerufen und zwischengespeichert. Aktienkurse werden alle 6 Stunden, Fair-Value-Berechnungen
+                alle 24 Stunden aktualisiert.
+              </div>
+              <div style={{ marginBottom: '0.35rem' }}>
+                <strong style={{ color: 'var(--text-secondary, #9ca3af)' }}>Lizenz:</strong>{' '}
+                Die Daten unterliegen den{' '}
+                <a
+                  href="https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'rgba(139, 92, 246, 0.8)', textDecoration: 'underline' }}
+                >
+                  Yahoo Terms of Service
+                </a>.
+                Die Nutzung erfolgt ausschließlich zu informativen Zwecken.
+                Alle Daten werden ohne Gewähr bereitgestellt ("as is").
+              </div>
+              <div>
+                <strong style={{ color: 'var(--text-secondary, #9ca3af)' }}>Letzter Abruf:</strong>{' '}
+                {new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

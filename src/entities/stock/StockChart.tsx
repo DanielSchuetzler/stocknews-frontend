@@ -358,6 +358,13 @@ export const StockChart: React.FC<StockChartProps> = ({
           },
           mode: 'x',
         },
+        limits: {
+          x: {
+            min: prices.length > 0 ? new Date(prices[0].date).getTime() : undefined,
+            max: prices.length > 0 ? new Date(prices[prices.length - 1].date).getTime() : undefined,
+            minRange: 30 * 24 * 60 * 60 * 1000, // Minimum zoom: 30 days visible
+          },
+        },
       },
     },
     scales: {
@@ -394,7 +401,7 @@ export const StockChart: React.FC<StockChartProps> = ({
         bottom: 15,
       },
     },
-  }), [newsAnnotations, showNews]);
+  }), [newsAnnotations, showNews, prices]);
 
   // Custom plugin: re-draw fair value dataset in afterDraw so it renders on the
   // highest layer — above news annotation dots and the stock price line.
