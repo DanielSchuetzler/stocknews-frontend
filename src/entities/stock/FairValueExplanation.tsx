@@ -216,13 +216,22 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
                 Projiziert den Free Cash Flow für 5 Jahre in die Zukunft und diskontiert
                 alle zukünftigen Zahlungsströme auf den heutigen Wert.
+                {ex.grahamSector
+                  ? ` Diskontierungssatz und terminales Wachstum sind an die Branche "${ex.grahamSector}" angepasst, um das branchenspezifische Risikoprofil und Wachstumspotenzial widerzuspiegeln.`
+                  : ' Es werden die Standard-Parameter (10% Diskontierung, 2,5% terminales Wachstum) verwendet.'}
               </p>
               <FormulaBox formula="Fair Value = (Σ FCF_n / (1+r)^n + TV / (1+r)^5) / Aktien" />
               {ex.dcfApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
                   <div>Wachstumsrate: {formatPercent(ex.dcfGrowthRate)}</div>
-                  <div>Diskontierungssatz: {formatPercent(ex.dcfDiscountRate)}</div>
-                  <div>Terminales Wachstum: {formatPercent(ex.dcfTerminalGrowth)}</div>
+                  <div>
+                    Diskontierungssatz (r): {formatPercent(ex.dcfDiscountRate)}
+                    {ex.grahamSector && <> — <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>{ex.grahamSector}</strong></>}
+                  </div>
+                  <div>
+                    Terminales Wachstum: {formatPercent(ex.dcfTerminalGrowth)}
+                    {ex.grahamSector && <> — <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>{ex.grahamSector}</strong></>}
+                  </div>
                   {ex.dcfTerminalValue != null && (
                     <div>Terminal Value: {formatLargeNumber(ex.dcfTerminalValue)}</div>
                   )}
@@ -259,13 +268,21 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
                 Benjamin Grahams Intrinsic-Value-Formel aus "The Intelligent Investor".
                 Bewertet eine Aktie basierend auf dem aktuellen Gewinn und der erwarteten Wachstumsrate.
+                {ex.grahamSector
+                  ? ` Das Basis-KGV wurde an die Branche "${ex.grahamSector}" angepasst, da verschiedene Branchen unterschiedliche typische Bewertungsmultiplikatoren aufweisen.`
+                  : ' Es wird das Standard-KGV von 8,5 (Grahams Original) verwendet, da keine Branche zugewiesen ist.'}
               </p>
-              <FormulaBox formula="Fair Value = EPS × (8,5 + 2 × g)" />
+              <FormulaBox formula={`Fair Value = EPS × (${ex.grahamBasePE != null ? formatNumber(ex.grahamBasePE, 1).replace('.', ',') : '8,5'} + 2 × g)`} />
               {ex.grahamApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
                   <div>EPS: {formatCurrency(ex.eps, ex.currency)}</div>
                   <div>Wachstumsrate (g): {formatPercent(ex.earningsGrowthRate)}</div>
-                  <div>8,5 = Basis-KGV bei 0% Wachstum (Grahams Benchmark)</div>
+                  <div>
+                    {ex.grahamBasePE != null ? formatNumber(ex.grahamBasePE, 1) : '8,5'} = Basis-KGV
+                    {ex.grahamSector
+                      ? <> für Branche <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>{ex.grahamSector}</strong></>
+                      : ' bei 0% Wachstum (Grahams Benchmark)'}
+                  </div>
                 </div>
               )}
               {dataPoints && dataPoints.some(dp => dp.fairValueGraham != null) && (
@@ -299,6 +316,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
                 Peter Lynchs PEG-basierte Bewertung aus "One Up on Wall Street".
                 Ein fair gehandeltes Unternehmen hat ein KGV gleich seiner Wachstumsrate.
+                Dieses Modell ist nur bei Wachstumsunternehmen mit mindestens 8% Gewinnwachstum aussagekräftig — bei niedrigerem Wachstum liefert die Formel unrealistisch niedrige Werte.
               </p>
               <FormulaBox formula="Fair Value = EPS × Wachstumsrate (%)" />
               {ex.lynchApplicable && (
@@ -554,9 +572,10 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
             </ul>
             <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Hinweis:</strong>{' '}
             Diese Fair-Value-Berechnung basiert auf vereinfachten Bewertungsmodellen und
-            öffentlich verfügbaren Finanzdaten. Sie ersetzt keine professionelle Aktienanalyse
-            und stellt keine Anlageempfehlung dar. Bewertungsmodelle haben je nach Branche und
-            Unternehmenssituation unterschiedliche Aussagekraft.
+            öffentlich verfügbaren Finanzdaten. Das Graham-Modell verwendet branchenspezifische
+            Basis-KGV-Werte, da verschiedene Sektoren (z.B. Technologie vs. Finanzen) unterschiedliche
+            typische Bewertungsniveaus aufweisen. Sie ersetzt keine professionelle Aktienanalyse
+            und stellt keine Anlageempfehlung dar.
           </div>
         </div>
       )}

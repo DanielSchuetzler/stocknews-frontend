@@ -330,6 +330,14 @@ export const StockDetailPage = () => {
                 {stockData.currency}
               </span>
             </div>
+            {company?.sectorDisplayName && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Branche:</span>
+                <span style={{ color: 'rgba(139, 92, 246, 1)', fontWeight: 600, fontSize: '0.95rem' }}>
+                  {company.sectorDisplayName}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Valuation Indicator — Kurs → Fair Value with arrow and verdict */}

@@ -12,6 +12,8 @@ export interface Company {
   description?: string;
   businessModel?: string;
   products?: string;
+  sector?: string;              // Enum name: TECHNOLOGY, FINANCIALS, etc.
+  sectorDisplayName?: string;   // German display: Technologie, Finanzen, etc.
   lastUpdatedAt?: string;
   createdAt: string;
 }
