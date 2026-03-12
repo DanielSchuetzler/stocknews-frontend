@@ -577,28 +577,40 @@ export const StockDetailPage = () => {
               />
             </div>
 
-            {/* Stock price data source attribution */}
+            {/* Stock price data source attribution + disclaimer */}
             <div style={{
               display: 'flex',
-              justifyContent: 'flex-end',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              gap: '0.35rem',
               padding: '0.35rem 0.5rem 0',
               fontSize: '0.65rem',
               color: 'var(--text-muted, #6b7280)',
               opacity: 0.7,
+              flexWrap: 'wrap',
+              gap: '0.25rem',
             }}>
-              <span>Kursdaten:</span>
-              <a
-                href="https://finance.yahoo.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'rgba(139, 92, 246, 0.7)', textDecoration: 'none' }}
-              >
-                Yahoo Finance
-              </a>
-              <span>·</span>
-              <span>Abruf: {new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+              <span>
+                Keine Anlageberatung, nur zum Zwecke der Information!{' '}
+                <a
+                  href="#hinweise"
+                  style={{ color: 'var(--text-muted, #6b7280)', textDecoration: 'underline' }}
+                >
+                  Siehe Hinweise
+                </a>
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span>Kursdaten:</span>
+                <a
+                  href="https://finance.yahoo.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'rgba(139, 92, 246, 0.7)', textDecoration: 'none' }}
+                >
+                  Yahoo Finance
+                </a>
+                <span>·</span>
+                <span>Abruf: {new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+              </span>
             </div>
 
             {/* Fair Value Explanation - Below chart */}

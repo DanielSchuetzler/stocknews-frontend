@@ -21,14 +21,15 @@ export const Footer = () => {
             maxWidth: '1000px',
             margin: '0 auto'
           }}>
-            <h3 style={{
+            <h3 id="hinweise" style={{
               fontSize: '1.5rem',
               fontWeight: 700,
               color: 'var(--text-primary)',
               marginBottom: '1.5rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              scrollMarginTop: '80px'
             }}>
               ⚖️ Rechtlicher Hinweis & Haftungsausschluss
             </h3>

@@ -89,8 +89,8 @@ export const Header = () => {
             <line x1="44" y1="33" x2="32" y2="26" stroke="#22d3ee" strokeWidth="0.7" opacity="0.35"/>
             {/* Chart line overlay */}
             <path
-              d="M12 42 L20 37 L26 40 L32 30 L38 34 L44 28 L52 24"
-              stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              d="M10 44 L16 40 L22 42 L28 34 L34 37 L40 30 L46 26 L53 21"
+              stroke="#34d399" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"
             />
           </svg>
 
