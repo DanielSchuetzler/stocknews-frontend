@@ -97,7 +97,7 @@ export const QuellenPage = () => {
       <div className="legal-section">
         <h2>Kontakt</h2>
         <p>Bei Fragen zu den verwendeten Quellen oder Lizenzinformationen wenden Sie sich bitte an:</p>
-        <p><strong>E-Mail:</strong> kontakt@stocknewspulse.de</p>
+        <p><strong>E-Mail:</strong> info@brainytrader.info</p>
       </div>
     </LegalPageLayout>
   );

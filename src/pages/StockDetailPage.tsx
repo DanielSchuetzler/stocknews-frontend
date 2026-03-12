@@ -214,11 +214,11 @@ export const StockDetailPage = () => {
   const exchange = company?.exchange || stockData.exchange || '';
 
   // SEO: Einprägsame, informative Meta-Texte
-  const pageTitle = `${companyName} (${ticker}) Aktie – News & Kursverlauf | StockNewsPulse`;
-  const metaDescription = `${companyName} (${ticker}): Aktueller Kurs ${latestPrice} ${currencySymbol}. Sieh welche News den ${ticker}-Kurs bewegt haben – historisch visualisiert auf StockNewsPulse. Kostenlos, ohne Anmeldung.`;
+  const pageTitle = `${companyName} (${ticker}) Aktie – News & Kursverlauf | BrainyTrader`;
+  const metaDescription = `${companyName} (${ticker}): Aktueller Kurs ${latestPrice} ${currencySymbol}. Sieh welche News den ${ticker}-Kurs bewegt haben – historisch visualisiert auf BrainyTrader. Kostenlos, ohne Anmeldung.`;
   const ogTitle = `${companyName} (${ticker}) – Warum bewegt sich der Kurs?`;
   const ogDescription = `Entdecke, wie News den ${companyName}-Aktienkurs beeinflusst haben. Interaktiver Chart mit historischen Ereignissen – sofort verständlich für private & institutionelle Investoren.`;
-  const canonicalUrl = `https://stocknewspulse.info/stocks/${ticker}`;
+  const canonicalUrl = `https://brainytrader.info/stocks/${ticker}`;
 
   // JSON-LD: Strukturierte Daten für die Stock-Seite
   const stockJsonLd = {
@@ -230,8 +230,8 @@ export const StockDetailPage = () => {
     "inLanguage": "de",
     "isPartOf": {
       "@type": "WebSite",
-      "name": "StockNewsPulse",
-      "url": "https://stocknewspulse.info"
+      "name": "BrainyTrader",
+      "url": "https://brainytrader.info"
     },
     "about": {
       "@type": "Corporation",
@@ -246,8 +246,8 @@ export const StockDetailPage = () => {
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "StockNewsPulse",
-          "item": "https://stocknewspulse.info"
+          "name": "BrainyTrader",
+          "item": "https://brainytrader.info"
         },
         {
           "@type": "ListItem",
@@ -271,17 +271,17 @@ export const StockDetailPage = () => {
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="StockNewsPulse" />
+        <meta property="og:site_name" content="BrainyTrader" />
         <meta property="og:title" content={ogTitle} />
         <meta property="og:description" content={ogDescription} />
-        <meta property="og:image" content="https://stocknewspulse.info/og-image.png" />
+        <meta property="og:image" content="https://brainytrader.info/og-image.png" />
         <meta property="og:locale" content="de_DE" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={ogTitle} />
         <meta name="twitter:description" content={ogDescription} />
-        <meta name="twitter:image" content="https://stocknewspulse.info/og-image.png" />
+        <meta name="twitter:image" content="https://brainytrader.info/og-image.png" />
 
         {/* Structured Data  */}
         <script type="application/ld+json">{JSON.stringify(stockJsonLd)}</script>

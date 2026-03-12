@@ -16,7 +16,7 @@ export const DatenschutzPage = () => {
         <h3>Datenerfassung auf dieser Website</h3>
         <p><strong>Wer ist verantwortlich?</strong><br />
         Daniel Sch&uuml;tzler, Buchenstra&szlig;e 3, 22299 Hamburg<br />
-        E-Mail: info@stocknewspulse.info</p>
+        E-Mail: info@brainytrader.info</p>
 
         <p><strong>Wie erfassen wir Ihre Daten?</strong><br />
         Ihre Daten werden erhoben, wenn Sie sich registrieren, einloggen oder die Website nutzen. Technische Daten (Browsertyp, IP-Adresse, Zugriffszeit) werden automatisch beim Besuch erfasst.</p>
@@ -45,10 +45,10 @@ export const DatenschutzPage = () => {
         <p>Daniel Sch&uuml;tzler<br />
         Buchenstra&szlig;e 3<br />
         22299 Hamburg<br />
-        E-Mail: info@stocknewspulse.info</p>
+        E-Mail: info@brainytrader.info</p>
 
         <h3>Widerruf Ihrer Einwilligung</h3>
-        <p>Sofern die Datenverarbeitung auf Ihrer Einwilligung beruht, k&ouml;nnen Sie diese jederzeit widerrufen. Die Rechtm&auml;&szlig;igkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unber&uuml;hrt. Richten Sie Ihren Widerruf an: info@stocknewspulse.info</p>
+        <p>Sofern die Datenverarbeitung auf Ihrer Einwilligung beruht, k&ouml;nnen Sie diese jederzeit widerrufen. Die Rechtm&auml;&szlig;igkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unber&uuml;hrt. Richten Sie Ihren Widerruf an: info@brainytrader.info</p>
 
         <h3>Beschwerderecht bei der Aufsichtsbeh&ouml;rde</h3>
         <p>Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbeh&ouml;rde zu beschweren. Zust&auml;ndige Aufsichtsbeh&ouml;rde:<br />
@@ -163,7 +163,7 @@ export const DatenschutzPage = () => {
           <li><strong>Daten&uuml;bertragbarkeit</strong> (Art. 20 DSGVO): Export Ihrer Daten in maschinenlesbarem Format. Dies k&ouml;nnen Sie selbst in den Kontoeinstellungen durchf&uuml;hren.</li>
           <li><strong>Widerspruch</strong> (Art. 21 DSGVO): Widerspruch gegen die Verarbeitung.</li>
         </ul>
-        <p>Zur Aus&uuml;bung Ihrer Rechte wenden Sie sich an: info@stocknewspulse.info</p>
+        <p>Zur Aus&uuml;bung Ihrer Rechte wenden Sie sich an: info@brainytrader.info</p>
       </div>
 
       <div className="legal-section">
@@ -182,7 +182,7 @@ export const DatenschutzPage = () => {
         <h2>9. Kontakt</h2>
         <p>Bei Fragen zum Datenschutz wenden Sie sich an:<br />
         Daniel Sch&uuml;tzler<br />
-        E-Mail: info@stocknewspulse.info</p>
+        E-Mail: info@brainytrader.info</p>
       </div>
     </LegalPageLayout>
   );

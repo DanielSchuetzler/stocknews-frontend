@@ -1,6 +1,6 @@
 /**
  * Homepage with Hero Section and Examples
- * EXACT design from original frontend with dark theme
+ * BrainyTrader – AI-native Aktienanalyse & Fair Value
  */
 
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -19,9 +19,9 @@ export const HomePage = () => {
   const homeJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "StockNewsPulse – Aktienkurs trifft News",
-    "description": "Historische Visualisierung von Aktien-News-Events auf dem Kurschart. Verstehe, wie Nachrichten Kursbewegungen ausgelöst haben.",
-    "url": "https://stocknewspulse.info",
+    "name": "BrainyTrader – AI-native Aktienanalyse & Fair Value",
+    "description": "KI-gestützte Fair Value Berechnung für Aktien. Erfahre mit wissenschaftlichen Modellen (DCF, Graham, Lynch, Ertragswert), ob eine Aktie über- oder unterbewertet ist.",
+    "url": "https://brainytrader.info",
     "inLanguage": "de",
     "speakable": {
       "@type": "SpeakableSpecification",
@@ -41,17 +41,17 @@ export const HomePage = () => {
           fontSize: '0.95rem',
           fontWeight: 500
         }}>
-          ✓ Dein Konto wurde erfolgreich gelöscht.
+          Dein Konto wurde erfolgreich gelöscht.
         </div>
       )}
 
       <Helmet>
-        <title>StockNewsPulse – Warum bewegt sich eine Aktie? News erklärt den Kurs</title>
-        <meta name="description" content="StockNewsPulse mappt historische News-Events auf den Aktienchart. Verstehe, welche Nachrichten Kursbewegungen ausgelöst haben – kostenlos, für 15.000+ Aktien weltweit." />
-        <link rel="canonical" href="https://stocknewspulse.info/" />
-        <meta property="og:url" content="https://stocknewspulse.info/" />
-        <meta property="og:title" content="StockNewsPulse – Der Kurs erklärt sich selbst" />
-        <meta property="og:description" content="News-Events direkt im Aktienchart sehen. Historische Kursanalyse für private & institutionelle Investoren. 15.000+ Aktien, kostenlos." />
+        <title>BrainyTrader – Was ist eine Aktie wirklich wert? | AI-native Fair Value Analyse</title>
+        <meta name="description" content="BrainyTrader berechnet den fairen Wert von Aktien mit KI und wissenschaftlichen Modellen (DCF, Graham, Lynch, Ertragswert). Erkenne Über- und Unterbewertungen – kostenlos, für 15.000+ Aktien." />
+        <link rel="canonical" href="https://brainytrader.info/" />
+        <meta property="og:url" content="https://brainytrader.info/" />
+        <meta property="og:title" content="BrainyTrader – AI-native Aktienanalyse & Fair Value" />
+        <meta property="og:description" content="Was ist eine Aktie wirklich wert? KI-gestützte Fair Value Analyse mit 4 wissenschaftlichen Bewertungsmodellen. 15.000+ Aktien, kostenlos." />
         <script type="application/ld+json">{JSON.stringify(homeJsonLd)}</script>
       </Helmet>
 
@@ -62,6 +62,26 @@ export const HomePage = () => {
         textAlign: 'center'
       }}>
         <div className="app-container">
+          {/* AI Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: 'rgba(34, 211, 238, 0.1)',
+            border: '1px solid rgba(34, 211, 238, 0.3)',
+            borderRadius: '999px',
+            padding: '0.4rem 1rem',
+            marginBottom: '1.5rem',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            color: '#22d3ee'
+          }}>
+            <svg viewBox="0 0 16 16" fill="currentColor" style={{ width: '14px', height: '14px' }}>
+              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2.5a1 1 0 011 1v3a1 1 0 01-2 0v-3a1 1 0 011-1zm2.5 4.5l-2 2-1.5-1.5" />
+            </svg>
+            AI-native Aktienanalyse
+          </div>
+
           <h1 style={{
             fontSize: 'clamp(2rem, 5vw, 3rem)',
             fontWeight: 800,
@@ -72,10 +92,10 @@ export const HomePage = () => {
             backgroundClip: 'text',
             lineHeight: 1.3
           }}>
-            Verstehe, wie News Aktienkurse bewegen
+            Was ist eine Aktie wirklich wert?
           </h1>
 
-          <p style={{
+          <p className="hero-description" style={{
             fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
             color: 'var(--text-secondary)',
             marginBottom: '2rem',
@@ -83,7 +103,8 @@ export const HomePage = () => {
             margin: '0 auto 2.5rem',
             lineHeight: 1.6
           }}>
-            Sieh auf einen Blick, wie sich positive und negative Nachrichten in der Vergangenheit auf den Kurs ausgewirkt haben
+            BrainyTrader berechnet den fairen Wert jeder Aktie mit KI und wissenschaftlichen Modellen.
+            Erkenne auf einen Blick, ob eine Aktie über- oder unterbewertet ist.
           </p>
 
           <p style={{
@@ -92,7 +113,7 @@ export const HomePage = () => {
             fontWeight: 600,
             marginBottom: '1rem'
           }}>
-            Probiere es jetzt aus:
+            Jetzt Aktie analysieren:
           </p>
 
           {/* Search Box */}
@@ -152,70 +173,6 @@ export const HomePage = () => {
             ))}
           </div>
 
-          {/* Stats Bar */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '2rem',
-            padding: '2rem',
-            background: 'rgba(59, 130, 246, 0.05)',
-            borderRadius: '12px',
-            border: '1px solid rgba(59, 130, 246, 0.1)',
-            maxWidth: '900px',
-            margin: '0 auto'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-                fontWeight: 700,
-                color: 'var(--primary-color)',
-                marginBottom: '0.5rem'
-              }}>
-                &gt;30,000,000
-              </div>
-              <div style={{
-                fontSize: '0.95rem',
-                color: 'var(--text-secondary)',
-                fontWeight: 500
-              }}>
-                Analysierte News-Events
-              </div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-                fontWeight: 700,
-                color: 'var(--primary-color)',
-                marginBottom: '0.5rem'
-              }}>
-                15,000+
-              </div>
-              <div style={{
-                fontSize: '0.95rem',
-                color: 'var(--text-secondary)',
-                fontWeight: 500
-              }}>
-                Verfügbare Aktien
-              </div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-                fontWeight: 700,
-                color: 'var(--primary-color)',
-                marginBottom: '0.5rem'
-              }}>
-                100%
-              </div>
-              <div style={{
-                fontSize: '0.95rem',
-                color: 'var(--text-secondary)',
-                fontWeight: 500
-              }}>
-                Kostenlos
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -281,7 +238,7 @@ export const HomePage = () => {
                     color: 'var(--text-secondary)',
                     lineHeight: 1.6
                   }}>
-                    Gib einen Ticker ein und erhalte historische Kursdaten
+                    Gib einen Ticker ein und erhalte sofort eine umfassende Analyse
                   </p>
                 </div>
               </div>
@@ -313,13 +270,13 @@ export const HomePage = () => {
                     color: 'var(--text-primary)',
                     marginBottom: '0.5rem'
                   }}>
-                    News im Chart sehen
+                    Fair Value berechnen lassen
                   </h3>
                   <p style={{
                     color: 'var(--text-secondary)',
                     lineHeight: 1.6
                   }}>
-                    Positive und negative Events direkt visualisiert
+                    KI analysiert mit DCF, Graham, Lynch & Ertragswert den fairen Wert
                   </p>
                 </div>
               </div>
@@ -351,19 +308,19 @@ export const HomePage = () => {
                     color: 'var(--text-primary)',
                     marginBottom: '0.5rem'
                   }}>
-                    Muster erkennen
+                    Über- oder Unterbewertung erkennen
                   </h3>
                   <p style={{
                     color: 'var(--text-secondary)',
                     lineHeight: 1.6
                   }}>
-                    Verstehe Kursreaktionen auf verschiedene Event-Typen
+                    Sieh sofort, ob der Marktpreis über oder unter dem fairen Wert liegt
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Right: Animated Chart Mockup */}
+            {/* Right: Animated Chart Mockup with Fair Value Line */}
             <div style={{
               background: 'var(--background)',
               borderRadius: '12px',
@@ -378,7 +335,7 @@ export const HomePage = () => {
                     <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 0 }} />
                   </linearGradient>
                 </defs>
-                {/* Chart Line */}
+                {/* Chart Line (Market Price) */}
                 <polyline
                   points="10,120 30,118 50,115 70,113 90,110 100,111 115,130 130,140 150,138 170,135 190,133 210,100 230,85 250,65 270,50 285,40"
                   fill="none"
@@ -390,12 +347,14 @@ export const HomePage = () => {
                   points="10,120 30,118 50,115 70,113 90,110 100,111 115,130 130,140 150,138 170,135 190,133 210,100 230,85 250,65 270,50 285,40 285,190 10,190"
                   fill="url(#chartGradient)"
                 />
-                {/* Negative News Marker */}
-                <circle cx="100" cy="111" r="6" fill="#ef4444" className="pulse-marker" />
-                <line x1="100" y1="111" x2="100" y2="30" stroke="#ef4444" strokeWidth="2" strokeDasharray="3,3" />
-                {/* Positive News Marker - positioned at upper right of uptrend */}
-                <circle cx="250" cy="65" r="6" fill="#10b981" className="pulse-marker" />
-                <line x1="250" y1="65" x2="250" y2="30" stroke="#10b981" strokeWidth="2" strokeDasharray="3,3" />
+                {/* Fair Value Line (horizontal, dashed) */}
+                <line x1="10" y1="100" x2="285" y2="100" stroke="#10b981" strokeWidth="2" strokeDasharray="6,4" />
+                {/* Fair Value Label */}
+                <text x="200" y="95" fill="#10b981" fontSize="10" fontWeight="600">Fair Value</text>
+                {/* Overvalued zone marker */}
+                <text x="260" y="35" fill="#ef4444" fontSize="9" fontWeight="500">Überbewertet</text>
+                {/* Undervalued zone marker */}
+                <text x="100" y="155" fill="#10b981" fontSize="9" fontWeight="500">Unterbewertet</text>
               </svg>
               <div style={{
                 display: 'flex',
@@ -412,10 +371,10 @@ export const HomePage = () => {
                     width: '12px',
                     height: '12px',
                     borderRadius: '50%',
-                    background: '#ef4444'
+                    background: '#3b82f6'
                   }} />
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Negative News
+                    Marktpreis
                   </span>
                 </div>
                 <div style={{
@@ -424,13 +383,12 @@ export const HomePage = () => {
                   gap: '0.5rem'
                 }}>
                   <div style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: '#10b981'
+                    width: '24px',
+                    height: '2px',
+                    borderTop: '2px dashed #10b981'
                   }} />
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Positive News
+                    Fair Value
                   </span>
                 </div>
               </div>
@@ -439,7 +397,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Event-Driven Trading Section */}
+      {/* Features Section */}
       <section style={{
         padding: '4rem 0',
         background: 'var(--background)'
@@ -450,10 +408,20 @@ export const HomePage = () => {
             fontWeight: 700,
             textAlign: 'center',
             color: 'var(--text-primary)',
-            marginBottom: '3rem'
+            marginBottom: '1rem'
           }}>
-            Event-Driven Trading
+            Fundierte Analyse statt Bauchgefühl
           </h2>
+          <p style={{
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+            marginBottom: '3rem',
+            fontSize: '1.1rem',
+            maxWidth: '700px',
+            margin: '0 auto 3rem'
+          }}>
+            BrainyTrader kombiniert KI mit bewährten Bewertungsmethoden aus der Finanzwissenschaft
+          </p>
 
           <div style={{
             display: 'grid',
@@ -463,11 +431,11 @@ export const HomePage = () => {
           }}>
             {/* Feature 1 */}
             <div className="card" style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: '3rem',
-                marginBottom: '1rem'
-              }}>
-                📈
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+                <svg viewBox="0 0 48 48" fill="none" style={{ width: '48px', height: '48px', margin: '0 auto' }}>
+                  <path d="M24 4C18 4 14 7 13 11c-3 .6-5 3.4-5 6 0 3 1.6 5.6 4 7-.4 1-.6 2-.6 3 0 4.4 3.6 8 8 8h1c1 2.4 3.4 4 6 4s5-1.6 6-4h1c4.4 0 8-3.6 8-8 0-1-.2-2-.6-3 2.4-1.4 4-4 4-7 0-3.6-3-6.4-6-7-1-4-5-7-10-7z" fill="#6366f1" opacity="0.2"/>
+                  <path d="M14 26l4-5 3.5 3.5 5-7 4 4L34 17" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
               <h3 style={{
                 fontSize: '1.5rem',
@@ -475,24 +443,24 @@ export const HomePage = () => {
                 color: 'var(--text-primary)',
                 marginBottom: '1rem'
               }}>
-                Historische Analyse
+                KI-gestützte Bewertung
               </h3>
               <p style={{
                 color: 'var(--text-secondary)',
                 lineHeight: '1.6'
               }}>
-                Betrachte vergangene News-Events und deren direkten Einfluss auf Aktienkurse.
-                Lerne aus historischen Mustern.
+                Unsere KI kombiniert 4 wissenschaftliche Bewertungsmodelle und gewichtet sie sektorspezifisch für ein präzises Ergebnis.
               </p>
             </div>
 
             {/* Feature 2 */}
             <div className="card" style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: '3rem',
-                marginBottom: '1rem'
-              }}>
-                📰
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+                <svg viewBox="0 0 48 48" fill="none" style={{ width: '48px', height: '48px', margin: '0 auto' }}>
+                  <rect x="6" y="6" width="36" height="36" rx="4" fill="#10b981" opacity="0.2"/>
+                  <path d="M14 34V22m6 12V18m6 16V14m6 20V10" stroke="#10b981" strokeWidth="3" strokeLinecap="round"/>
+                  <line x1="10" y1="24" x2="38" y2="24" stroke="#10b981" strokeWidth="1.5" strokeDasharray="3,2"/>
+                </svg>
               </div>
               <h3 style={{
                 fontSize: '1.5rem',
@@ -500,24 +468,25 @@ export const HomePage = () => {
                 color: 'var(--text-primary)',
                 marginBottom: '1rem'
               }}>
-                News-Sentiment
+                Fair Value Analyse
               </h3>
               <p style={{
                 color: 'var(--text-secondary)',
                 lineHeight: '1.6'
               }}>
-                Alle News werden mit Sentiment-Analyse versehen (positiv/negativ) und
-                direkt im Chart visualisiert.
+                DCF, Graham, Peter Lynch & Ertragswert – 4 bewährte Methoden kombiniert zu einem gewichteten fairen Wert.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="card" style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: '3rem',
-                marginBottom: '1rem'
-              }}>
-                🎯
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+                <svg viewBox="0 0 48 48" fill="none" style={{ width: '48px', height: '48px', margin: '0 auto' }}>
+                  <rect x="4" y="10" width="40" height="28" rx="3" fill="#f59e0b" opacity="0.2"/>
+                  <path d="M12 30l6-8 4 4 6-10 4 6 4-4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="18" cy="22" r="2" fill="#10b981"/>
+                  <circle cx="32" cy="18" r="2" fill="#ef4444"/>
+                </svg>
               </div>
               <h3 style={{
                 fontSize: '1.5rem',
@@ -525,16 +494,128 @@ export const HomePage = () => {
                 color: 'var(--text-primary)',
                 marginBottom: '1rem'
               }}>
-                Eigene News
+                News-Impact Analyse
               </h3>
               <p style={{
                 color: 'var(--text-secondary)',
                 lineHeight: '1.6'
               }}>
-                Füge deine eigenen News-Events hinzu und verfolge deren Auswirkungen
-                auf die Kursentwicklung.
+                Historische News-Events direkt im Chart – verstehe, welche Nachrichten den Kurs beeinflusst haben.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Fair Value Methods Preview */}
+      <section style={{
+        padding: '4rem 0',
+        background: 'var(--surface)'
+      }}>
+        <div className="app-container">
+          <h2 style={{
+            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            fontWeight: 700,
+            textAlign: 'center',
+            color: 'var(--text-primary)',
+            marginBottom: '1rem'
+          }}>
+            4 wissenschaftliche Bewertungsmodelle
+          </h2>
+          <p style={{
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+            marginBottom: '3rem',
+            fontSize: '1.1rem'
+          }}>
+            Jedes Modell beleuchtet den Wert einer Aktie aus einem anderen Blickwinkel
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '1.5rem'
+          }}>
+            {[
+              {
+                title: 'DCF-Verfahren',
+                subtitle: 'Discounted Cash Flow',
+                desc: 'Projiziert zukünftige Cashflows und diskontiert sie auf den heutigen Wert',
+                color: '#3b82f6',
+                link: '/fair-value/dcf'
+              },
+              {
+                title: 'Graham-Formel',
+                subtitle: 'Benjamin Graham',
+                desc: 'Die klassische Value-Investing-Formel aus "The Intelligent Investor"',
+                color: '#10b981',
+                link: '/fair-value/graham'
+              },
+              {
+                title: 'PEG-Ratio',
+                subtitle: 'Peter Lynch',
+                desc: 'Bewertet Wachstumsaktien anhand des Verhältnisses von KGV zu Gewinnwachstum',
+                color: '#a855f7',
+                link: '/fair-value/lynch'
+              },
+              {
+                title: 'Ertragswert',
+                subtitle: 'Gordon Growth Model',
+                desc: 'Berechnet den nachhaltigen Wert basierend auf Eigenkapitalrendite und Wachstum',
+                color: '#f59e0b',
+                link: '/fair-value/ertragswert'
+              }
+            ].map((method) => (
+              <Link
+                key={method.title}
+                to={method.link}
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="card-hover" style={{
+                  padding: '1.5rem',
+                  cursor: 'pointer',
+                  borderLeft: `3px solid ${method.color}`
+                }}>
+                  <h3 style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {method.title}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.85rem',
+                    color: method.color,
+                    fontWeight: 600,
+                    marginBottom: '0.75rem'
+                  }}>
+                    {method.subtitle}
+                  </p>
+                  <p style={{
+                    fontSize: '0.9rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.5
+                  }}>
+                    {method.desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <Link
+              to="/fair-value"
+              style={{
+                color: 'var(--primary-color)',
+                fontWeight: 600,
+                fontSize: '1rem',
+                textDecoration: 'none'
+              }}
+            >
+              Alle Fair Value Methoden im Detail kennenlernen →
+            </Link>
           </div>
         </div>
       </section>
@@ -560,7 +641,7 @@ export const HomePage = () => {
             marginBottom: '3rem',
             fontSize: '1.1rem'
           }}>
-            Starte mit einer dieser populären Aktien
+            Fair Value & News-Analyse für die beliebtesten Aktien weltweit
           </p>
 
           <div style={{
@@ -628,7 +709,7 @@ export const HomePage = () => {
             color: 'var(--text-primary)',
             marginBottom: '1rem'
           }}>
-            Bereit für datenbasierte Entscheidungen?
+            Bereit für smartere Anlageentscheidungen?
           </h2>
           <p style={{
             fontSize: '1.2rem',
@@ -637,14 +718,14 @@ export const HomePage = () => {
             maxWidth: '700px',
             margin: '0 auto 2rem'
           }}>
-            Registriere dich kostenlos und starte mit der Analyse historischer News-Events.
+            Registriere dich kostenlos und nutze KI-gestützte Fair Value Analysen für deine Investments.
           </p>
           <Link to="/register">
             <button className="btn-primary" style={{
               padding: '1rem 2.5rem',
               fontSize: '1.2rem'
             }}>
-              Kostenlos registrieren
+              Kostenlos starten
             </button>
           </Link>
         </div>

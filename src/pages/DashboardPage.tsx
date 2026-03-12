@@ -39,7 +39,7 @@ export const DashboardPage = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard - Meine Favoriten | StockNewsPulse</title>
+        <title>Dashboard - Meine Favoriten | BrainyTrader</title>
         <meta name="description" content="Verwalte deine Lieblings-Aktien und analysiere deren News-Events" />
       </Helmet>
 
@@ -145,7 +145,7 @@ export const DashboardPage = () => {
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}>
-                  🎉 Willkommen bei StockNewsPulse!
+                  Willkommen bei BrainyTrader!
                 </h2>
                 <p style={{
                   fontSize: '1.1rem',

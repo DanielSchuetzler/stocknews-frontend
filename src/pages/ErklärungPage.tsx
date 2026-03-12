@@ -831,7 +831,7 @@ export const ErklärungPage = () => {
                 lineHeight: 1.7,
                 marginBottom: '1rem'
               }}>
-                Mit StockNewsPulse erhältst du Zugang zu derselben Methodik wie institutionelle Investoren – kostenlos und verständlich aufbereitet. Unsere Visualisierung zeigt dir die historischen Zusammenhänge: Wenn eine Aktie bei positiven Quartalsberichten historisch um 5-8% steigt, ist das ein wertvoller Datenpunkt.
+                Mit BrainyTrader erhältst du Zugang zu derselben Methodik wie institutionelle Investoren – kostenlos und verständlich aufbereitet. Unsere KI-gestützte Visualisierung zeigt dir die historischen Zusammenhänge: Wenn eine Aktie bei positiven Quartalsberichten historisch um 5-8% steigt, ist das ein wertvoller Datenpunkt.
               </p>
               <p style={{
                 color: 'var(--text-secondary)',

@@ -20,7 +20,7 @@ export const ImpressumPage = () => {
       <div className="legal-section">
         <h2>Kontakt</h2>
         <p>
-          E-Mail: info@stocknewspulse.info
+          E-Mail: info@brainytrader.info
         </p>
       </div>
 
@@ -57,7 +57,7 @@ export const ImpressumPage = () => {
         <h2>Finanzrechtliche Hinweise</h2>
 
         <h3>Keine Anlageberatung</h3>
-        <p><strong>WICHTIG:</strong> StockNewsPulse ist ein reines Informations- und Visualisierungs-Tool. Es werden keine Finanzdienstleistungen im Sinne des Kreditwesengesetzes (KWG) und keine Anlageberatung im Sinne des Wertpapierhandelsgesetzes (WpHG) erbracht.</p>
+        <p><strong>WICHTIG:</strong> BrainyTrader ist ein reines Informations- und Analyse-Tool. Es werden keine Finanzdienstleistungen im Sinne des Kreditwesengesetzes (KWG) und keine Anlageberatung im Sinne des Wertpapierhandelsgesetzes (WpHG) erbracht.</p>
 
         <h3>Keine Empfehlung zum Kauf oder Verkauf</h3>
         <p>Alle bereitgestellten Informationen, Charts und Daten dienen ausschlie&szlig;lich zu allgemeinen Informations- und Bildungszwecken. Sie stellen keine Aufforderung zum Kauf oder Verkauf von Wertpapieren oder anderen Finanzinstrumenten dar.</p>

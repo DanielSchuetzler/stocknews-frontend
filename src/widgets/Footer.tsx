@@ -75,15 +75,15 @@ export const Footer = () => {
                 color: 'var(--text-primary)',
                 marginBottom: '1rem'
               }}>
-                Über StockNewsPulse
+                Über BrainyTrader
               </h4>
               <p style={{
                 color: 'var(--text-secondary)',
                 lineHeight: 1.6,
                 fontSize: '0.95rem'
               }}>
-                Analyse-Tool zur Visualisierung von Zusammenhängen zwischen Aktienkursen und News-Events.
-                Entwickelt für Recherche und Bildungszwecke.
+                AI-native Aktienanalyse-Plattform. Berechnet den fairen Wert von Aktien mit KI und wissenschaftlichen Bewertungsmodellen.
+                Entwickelt für smarte Investoren.
               </p>
             </div>
 
@@ -250,14 +250,14 @@ export const Footer = () => {
                 fontSize: '0.9rem',
                 margin: '0 0 0.25rem 0'
               }}>
-                © 2026 StockNewsPulse. Alle Rechte vorbehalten.
+                © 2026 BrainyTrader. Alle Rechte vorbehalten.
               </p>
               <p style={{
                 color: 'var(--text-muted)',
                 fontSize: '0.85rem',
                 margin: 0
               }}>
-                Powered by React & Spring Boot | v1.0.0
+                Powered by AI, React & Spring Boot | v2.0.0
               </p>
             </div>
             <div style={{

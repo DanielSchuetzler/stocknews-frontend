@@ -44,24 +44,53 @@ export const Header = () => {
             flexShrink: 0
           }}
         >
-          {/* Logo Icon - Lightning Bolt */}
+          {/* Logo Icon - Realistic Brain with AI nodes & Chart */}
           <svg
             className="logo-icon"
-            viewBox="0 0 24 24"
+            viewBox="11 6 42 44"
             fill="none"
             style={{
-              width: '32px',
-              height: '32px',
-              color: 'var(--primary-color)',
-              animation: 'pulse 2s ease-in-out infinite'
+              width: '37px',
+              height: '37px'
             }}
           >
+            {/* Brain body – emoji-style silhouette in lila/indigo */}
             <path
-              d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d="M32 8 C28 8 25 9 23 11 C20 11.5 17 14 16 18 C14.5 19 13 22 13 25 C13 28 14 30.5 16 32 C15 34 15 36 16 38 C17 41 19 43.5 22 45 C24 46.5 27 48 30 48.5 L32 49 L34 48.5 C37 48 40 46.5 42 45 C45 43.5 47 41 48 38 C49 36 49 34 48 32 C50 30.5 51 28 51 25 C51 22 49.5 19 48 18 C47 14 44 11.5 41 11 C39 9 36 8 32 8Z"
+              fill="#818cf8" opacity="0.9"
+            />
+            {/* Left hemisphere darker */}
+            <path
+              d="M32 8 C28 8 25 9 23 11 C20 11.5 17 14 16 18 C14.5 19 13 22 13 25 C13 28 14 30.5 16 32 C15 34 15 36 16 38 C17 41 19 43.5 22 45 C24 46.5 27 48 30 48.5 L32 49 V8Z"
+              fill="#6366f1" opacity="0.35"
+            />
+            {/* Central fissure */}
+            <path d="M32 10 C31 16 33 22 31 28 C33 34 31 40 32 47" stroke="#4f46e5" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+            {/* Brain folds LEFT – prominent sulci */}
+            <path d="M17 22 C20 20 24 22 28 19 C30 18 31 19 31 20" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+            <path d="M15 28 C18 26 21 29 25 26 C28 25 30 27 31 28" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+            <path d="M16 34 C19 33 22 35 26 33 C28 32 30 34 31 35" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+            <path d="M18 40 C21 39 24 41 28 39 C30 38.5 31 40 31.5 41" stroke="#6366f1" strokeWidth="1.6" strokeLinecap="round" opacity="0.6"/>
+            {/* Brain folds RIGHT – prominent sulci */}
+            <path d="M47 22 C44 20 40 22 36 19 C34 18 33 19 33 20" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+            <path d="M49 28 C46 26 43 29 39 26 C36 25 34 27 33 28" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+            <path d="M48 34 C45 33 42 35 38 33 C36 32 34 34 33 35" stroke="#6366f1" strokeWidth="1.8" strokeLinecap="round" opacity="0.6"/>
+            <path d="M46 40 C43 39 40 41 36 39 C34 38.5 33 40 32.5 41" stroke="#6366f1" strokeWidth="1.6" strokeLinecap="round" opacity="0.6"/>
+            {/* AI neural network nodes */}
+            <circle cx="22" cy="21" r="2" fill="#22d3ee" opacity="0.85"/>
+            <circle cx="42" cy="21" r="2" fill="#22d3ee" opacity="0.85"/>
+            <circle cx="32" cy="26" r="2.2" fill="#22d3ee" opacity="0.95"/>
+            <circle cx="20" cy="33" r="1.8" fill="#22d3ee" opacity="0.75"/>
+            <circle cx="44" cy="33" r="1.8" fill="#22d3ee" opacity="0.75"/>
+            {/* Neural connections */}
+            <line x1="22" y1="21" x2="32" y2="26" stroke="#22d3ee" strokeWidth="0.9" opacity="0.45"/>
+            <line x1="42" y1="21" x2="32" y2="26" stroke="#22d3ee" strokeWidth="0.9" opacity="0.45"/>
+            <line x1="20" y1="33" x2="32" y2="26" stroke="#22d3ee" strokeWidth="0.7" opacity="0.35"/>
+            <line x1="44" y1="33" x2="32" y2="26" stroke="#22d3ee" strokeWidth="0.7" opacity="0.35"/>
+            {/* Chart line overlay */}
+            <path
+              d="M12 42 L20 37 L26 40 L32 30 L38 34 L44 28 L52 24"
+              stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             />
           </svg>
 
@@ -74,7 +103,7 @@ export const Header = () => {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            StockNewsPulse
+            BrainyTrader
           </span>
         </Link>
 
@@ -112,6 +141,21 @@ export const Header = () => {
             </Link>
           )}
 
+          <Link
+            to="/fair-value"
+            style={{
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+              fontWeight: 500,
+              fontSize: '0.95rem',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+          >
+            Fair Value
+          </Link>
+
           {!isAuthenticated && (
             <Link
               to="/erklarung"
@@ -125,7 +169,7 @@ export const Header = () => {
               onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
             >
-              Erklärung
+              News-Analyse
             </Link>
           )}
 
@@ -139,7 +183,8 @@ export const Header = () => {
                   textDecoration: 'none',
                   fontWeight: 500,
                   fontSize: '0.95rem',
-                  transition: 'color 0.2s'
+                  transition: 'color 0.2s',
+                  order: -1
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
@@ -159,7 +204,7 @@ export const Header = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
               >
-                Erklärung
+                News-Analyse
               </Link>
 
               <div style={{

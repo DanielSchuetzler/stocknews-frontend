@@ -72,7 +72,7 @@ export const RegisterForm: React.FC = () => {
             Konto erstellen
           </h1>
           <p className="text-gray-600">
-            Registriere dich kostenlos bei StockNewsPulse
+            Registriere dich kostenlos bei BrainyTrader
           </p>
         </div>
 

@@ -19,6 +19,11 @@ import { DatenschutzPage } from '@/pages/DatenschutzPage';
 import { ImpressumPage } from '@/pages/ImpressumPage';
 import { QuellenPage } from '@/pages/QuellenPage';
 import { ErklärungPage } from '@/pages/ErklärungPage';
+import { FairValueOverviewPage } from '@/pages/FairValueOverviewPage';
+import { FairValueDcfPage } from '@/pages/FairValueDcfPage';
+import { FairValueGrahamPage } from '@/pages/FairValueGrahamPage';
+import { FairValueLynchPage } from '@/pages/FairValueLynchPage';
+import { FairValueErtragswertPage } from '@/pages/FairValueErtragswertPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { OAuth2CallbackPage } from '@/pages/OAuth2CallbackPage';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
@@ -57,6 +62,11 @@ function App() {
           <Route path="/impressum" element={<ImpressumPage />} />
           <Route path="/quellen" element={<QuellenPage />} />
           <Route path="/erklarung" element={<ErklärungPage />} />
+          <Route path="/fair-value" element={<FairValueOverviewPage />} />
+          <Route path="/fair-value/dcf" element={<FairValueDcfPage />} />
+          <Route path="/fair-value/graham" element={<FairValueGrahamPage />} />
+          <Route path="/fair-value/lynch" element={<FairValueLynchPage />} />
+          <Route path="/fair-value/ertragswert" element={<FairValueErtragswertPage />} />
           <Route path="/oauth2/callback/google" element={<OAuth2CallbackPage />} />
           <Route path="/settings" element={
             <ProtectedRoute>

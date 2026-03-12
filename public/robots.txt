@@ -1,5 +1,5 @@
-# robots.txt – StockNewsPulse
-# https://stocknewspulse.info
+# robots.txt – BrainyTrader
+# https://brainytrader.info
 
 User-agent: *
 Allow: /
@@ -10,7 +10,7 @@ Disallow: /login
 Disallow: /register
 
 # Sitemaps
-Sitemap: https://stocknewspulse.info/sitemap.xml
+Sitemap: https://brainytrader.info/sitemap.xml
 
 # LLM-Beschreibung (llms.txt Standard)
-# https://stocknewspulse.info/llms.txt
+# https://brainytrader.info/llms.txt
