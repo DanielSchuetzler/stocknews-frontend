@@ -352,7 +352,7 @@ export const HomePage = () => {
                 {/* Fair Value Label */}
                 <text x="200" y="95" fill="#10b981" fontSize="10" fontWeight="600">Fair Value</text>
                 {/* Overvalued zone marker */}
-                <text x="260" y="35" fill="#ef4444" fontSize="9" fontWeight="500">Überbewertet</text>
+                <text x="225" y="35" fill="#ef4444" fontSize="9" fontWeight="500">Überbewertet</text>
                 {/* Undervalued zone marker */}
                 <text x="100" y="155" fill="#10b981" fontSize="9" fontWeight="500">Unterbewertet</text>
               </svg>
