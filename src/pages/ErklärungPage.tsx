@@ -3,12 +3,19 @@
  * Explains Event-Driven Trading with practical examples
  */
 
+import { Helmet } from 'react-helmet-async';
+
 export const ErklärungPage = () => {
   return (
     <div style={{
       minHeight: '100vh',
       background: 'var(--background)'
     }}>
+      <Helmet>
+        <title>News-Impact Analyse – Wie News Aktienkurse bewegen | BrainyTrader</title>
+        <meta name="description" content="Verstehe, wie Nachrichten den Aktienkurs beeinflussen. Event-Driven Analyse mit KI-Sentiment, historischer Visualisierung und wissenschaftlichem Hintergrund." />
+      </Helmet>
+
       {/* Disclaimer Banner */}
       <div style={{
         background: 'rgba(251, 146, 60, 0.08)',

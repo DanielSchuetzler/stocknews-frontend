@@ -39,8 +39,8 @@ export const DashboardPage = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard - Meine Favoriten | BrainyTrader</title>
-        <meta name="description" content="Verwalte deine Lieblings-Aktien und analysiere deren News-Events" />
+        <title>Mein Dashboard – Watchlist & AI-Analysen | BrainyTrader</title>
+        <meta name="description" content="Deine persönliche Watchlist: Fair Value Tracking, KI-gestützte Analysen und News-Alerts für deine Lieblingsaktien – alles auf einen Blick." />
       </Helmet>
 
       <div style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '4rem' }}>

@@ -321,7 +321,7 @@ export const HomePage = () => {
             </div>
 
             {/* Right: Animated Chart Mockup with Fair Value Line */}
-            <div style={{
+            <div className="homepage-chart-mockup" style={{
               background: 'var(--background)',
               borderRadius: '12px',
               padding: '2rem',
@@ -751,6 +751,17 @@ export const HomePage = () => {
         @media (max-width: 768px) {
           .how-it-works-grid {
             grid-template-columns: 1fr !important;
+          }
+
+          /* Chart mockup: edge-to-edge on mobile */
+          .homepage-chart-mockup {
+            border-radius: 0 !important;
+            padding: 1rem 0.5rem !important;
+            border-left: none !important;
+            border-right: none !important;
+            margin-left: calc(-1 * var(--spacing-md, 1rem)) !important;
+            margin-right: calc(-1 * var(--spacing-md, 1rem)) !important;
+            box-shadow: none !important;
           }
         }
       `}} />

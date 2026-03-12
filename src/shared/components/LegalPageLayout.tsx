@@ -5,6 +5,7 @@
 
 import { Link } from 'react-router-dom';
 import { ReactNode } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 interface LegalPageLayoutProps {
   title: string;
@@ -18,6 +19,9 @@ export const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayou
       minHeight: '100vh',
       background: 'var(--background)'
     }}>
+      <Helmet>
+        <title>{title} | BrainyTrader</title>
+      </Helmet>
       <div className="app-container" style={{
         maxWidth: '900px',
         padding: '3rem var(--spacing-md)'

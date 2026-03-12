@@ -214,10 +214,10 @@ export const StockDetailPage = () => {
   const exchange = company?.exchange || stockData.exchange || '';
 
   // SEO: Einprägsame, informative Meta-Texte
-  const pageTitle = `${companyName} (${ticker}) Aktie – News & Kursverlauf | BrainyTrader`;
-  const metaDescription = `${companyName} (${ticker}): Aktueller Kurs ${latestPrice} ${currencySymbol}. Sieh welche News den ${ticker}-Kurs bewegt haben – historisch visualisiert auf BrainyTrader. Kostenlos, ohne Anmeldung.`;
-  const ogTitle = `${companyName} (${ticker}) – Warum bewegt sich der Kurs?`;
-  const ogDescription = `Entdecke, wie News den ${companyName}-Aktienkurs beeinflusst haben. Interaktiver Chart mit historischen Ereignissen – sofort verständlich für private & institutionelle Investoren.`;
+  const pageTitle = `${companyName} (${ticker}) Aktie – Fair Value & AI-Analyse | BrainyTrader`;
+  const metaDescription = `${companyName} (${ticker}): Kurs ${latestPrice} ${currencySymbol} – ist die Aktie über- oder unterbewertet? KI-gestützte Fair Value Analyse mit DCF, Graham & mehr. Jetzt kostenlos prüfen.`;
+  const ogTitle = `${companyName} (${ticker}) – Fair Value & AI-Bewertung`;
+  const ogDescription = `Ist ${companyName} über- oder unterbewertet? KI-gestützte Fair Value Analyse, News-Impact-Visualisierung und 4 wissenschaftliche Bewertungsmodelle – kostenlos auf BrainyTrader.`;
   const canonicalUrl = `https://brainytrader.info/stocks/${ticker}`;
 
   // JSON-LD: Strukturierte Daten für die Stock-Seite
@@ -288,7 +288,7 @@ export const StockDetailPage = () => {
       </Helmet>
 
       {/* Container - Max 1400px like original */}
-      <div className="app-container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+      <div className="app-container stock-detail-page" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
         {/* Header: Company Name + Stock Info + Favorite Button - all inline */}
         <div className="stock-page-header" style={{
           display: 'flex',
@@ -374,7 +374,7 @@ export const StockDetailPage = () => {
             }
 
             return (
-              <div style={{
+              <div className="valuation-indicator" style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0',
@@ -901,15 +901,191 @@ export const StockDetailPage = () => {
         />
       )}
 
-      {/* CSS for responsive grid */}
+      {/* CSS for responsive grid + mobile optimization */}
       <style dangerouslySetInnerHTML={{ __html: `
+        /* ===== MOBILE: Full-width charts, no padding ===== */
+        @media (max-width: 767px) {
+          .stock-detail-page {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            overflow-x: hidden;
+          }
+
+          .stock-detail-page .stock-page-header {
+            padding: 0 0.75rem;
+            gap: 0.75rem;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center;
+          }
+
+          .stock-detail-page .stock-page-header h1 {
+            font-size: 1.5rem !important;
+            width: 100%;
+            text-align: center;
+          }
+
+          /* Stock info boxes: centered */
+          .stock-detail-page .stock-page-header > div {
+            gap: 0.75rem !important;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.8rem !important;
+            justify-content: center !important;
+          }
+
+          /* Favorite button: centered, not pushed right */
+          .stock-detail-page .stock-page-header > div:last-child {
+            margin-left: 0 !important;
+          }
+
+          /* Main grid: no gap on mobile, allow children to shrink */
+          .stock-detail-page .main-content-wrapper {
+            gap: 12px !important;
+            margin-top: 12px !important;
+          }
+
+          /* Card sections: zero horizontal padding, allow shrinking */
+          .stock-detail-page .card {
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+            padding: 0.75rem 0 !important;
+            min-width: 0 !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+          }
+
+          /* Chart header: keep some padding, allow shrinking */
+          .stock-detail-page .chart-section > div:first-child {
+            padding: 0 0.75rem;
+            flex-wrap: wrap !important;
+          }
+          /* Chart title: shrinkable */
+          .stock-detail-page .chart-section > div:first-child > h2 {
+            min-width: 0 !important;
+            flex: 1 1 100% !important;
+          }
+
+          /* Chart container: zero padding, full width */
+          .stock-detail-page .chart-section > div:nth-child(2) {
+            padding: 8px 0 0 0 !important;
+            border-radius: 0 !important;
+            height: 300px !important;
+            margin: 0 !important;
+          }
+
+          /* Chart.js canvas wrapper: match container height */
+          .stock-detail-page .chart-section > div:nth-child(2) > div {
+            height: 100% !important;
+          }
+
+          /* Source/disclaimer line below chart */
+          .stock-detail-page .chart-section > div:nth-child(3) {
+            padding: 0.35rem 0.75rem 0 !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+
+          /* Time range selector: full width, scrollable on mobile */
+          .stock-detail-page .chart-section > div:first-child > div:last-child {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 1 !important;
+            min-width: 0;
+            max-width: 100% !important;
+            width: 100% !important;
+            justify-content: center;
+          }
+          .stock-detail-page .chart-section > div:first-child > div:last-child button {
+            padding: 6px 10px !important;
+            font-size: 0.75rem !important;
+            white-space: nowrap;
+          }
+
+          /* Chart title: smaller on mobile */
+          .stock-detail-page .chart-section h2 {
+            font-size: 1.15rem !important;
+          }
+          .stock-detail-page .chart-section h2 span {
+            font-size: 0.9rem !important;
+          }
+
+          /* News section: padding for text content only */
+          .stock-detail-page .news-section > div {
+            padding: 0 0.75rem;
+          }
+          .stock-detail-page .news-section > div:last-child {
+            margin: 12px 0.75rem 0 !important;
+          }
+
+          /* FairValue explanation box */
+          .stock-detail-page .fair-value-explanation {
+            padding: 0 0.75rem;
+          }
+
+          /* Company profile card */
+          .stock-detail-page > .card {
+            margin-top: 12px !important;
+            padding: 0.75rem !important;
+          }
+          .stock-detail-page > .card > div {
+            padding: 0.5rem !important;
+          }
+          .stock-detail-page > .card .company-details-grid {
+            padding: 0.75rem !important;
+          }
+
+          /* Valuation indicator: prominent on mobile — eye-catching! */
+          .stock-detail-page .valuation-indicator {
+            padding: 0.75rem 1.25rem !important;
+            width: 100% !important;
+            max-width: 340px;
+            justify-content: center !important;
+            border-radius: 12px !important;
+            border-width: 2px !important;
+          }
+          .stock-detail-page .valuation-indicator > div:first-child,
+          .stock-detail-page .valuation-indicator > div:last-child {
+            min-width: 75px !important;
+          }
+          .stock-detail-page .valuation-indicator > div:first-child > div:nth-child(2),
+          .stock-detail-page .valuation-indicator > div:last-child > div:nth-child(2) {
+            font-size: 1.25rem !important;
+          }
+          .stock-detail-page .valuation-indicator > div:nth-child(2) {
+            padding: 0 0.5rem !important;
+            min-width: 90px !important;
+            flex: 1 !important;
+          }
+          .stock-detail-page .valuation-indicator > div:nth-child(2) > div:first-child {
+            font-size: 0.95rem !important;
+            padding: 0.25rem 0.75rem !important;
+          }
+        }
+
+        /* ===== SMALL MOBILE: Extra compact ===== */
+        @media (max-width: 400px) {
+          .stock-detail-page .stock-page-header h1 {
+            font-size: 1.25rem !important;
+          }
+          .stock-detail-page .chart-section > div:nth-child(2) {
+            height: 260px !important;
+          }
+        }
+
+        /* ===== TABLET / DESKTOP ===== */
+        @media (min-width: 768px) {
+          .stock-detail-page .card {
+            padding: 1.5rem;
+          }
+        }
+
         @media (min-width: 1200px) {
           .main-content-wrapper {
             grid-template-columns: 1fr clamp(450px, 35vw, 600px) !important;
             align-items: start;
-          }
-
-          .chart-section {
           }
 
           .news-section {
