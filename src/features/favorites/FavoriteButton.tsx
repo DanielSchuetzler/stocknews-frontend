@@ -47,8 +47,10 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
 
   return (
     <button
+      className="favorite-button"
       onClick={handleClick}
       disabled={isLoading}
+      title={isLoading ? 'Lädt...' : isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -60,7 +62,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
         borderRadius: '6px',
         borderColor: 'var(--border-color)',
         background: 'transparent',
-        color: 'var(--text-secondary)',
+        color: isFavorite ? '#facc15' : 'var(--text-secondary)',
         cursor: isLoading ? 'not-allowed' : 'pointer',
         transition: 'all 0.2s',
         opacity: isLoading ? 0.5 : 1
@@ -68,12 +70,12 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
       onMouseEnter={(e) => {
         if (!isLoading) {
           e.currentTarget.style.background = 'var(--surface-light)';
-          e.currentTarget.style.color = 'var(--text-primary)';
+          e.currentTarget.style.color = isFavorite ? '#facc15' : 'var(--text-primary)';
         }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent';
-        e.currentTarget.style.color = 'var(--text-secondary)';
+        e.currentTarget.style.color = isFavorite ? '#facc15' : 'var(--text-secondary)';
       }}
     >
       <svg
@@ -91,13 +93,15 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
       >
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
-      {isLoading ? (
-        'Lädt...'
-      ) : isFavorite ? (
-        'Aus Favoriten entfernen'
-      ) : (
-        'Zu Favoriten hinzufügen'
-      )}
+      <span className="favorite-button-text">
+        {isLoading ? (
+          'Lädt...'
+        ) : isFavorite ? (
+          'Aus Favoriten entfernen'
+        ) : (
+          'Zu Favoriten hinzufügen'
+        )}
+      </span>
     </button>
   );
 };

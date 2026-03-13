@@ -36,7 +36,8 @@ export const StockDetailPage = () => {
     url?: string;
   } | null>(null);
   const [highlightedNewsId, setHighlightedNewsId] = useState<number | null>(null);
-  const [showNewsOnChart, setShowNewsOnChart] = useState(true);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const [showNewsOnChart, setShowNewsOnChart] = useState(!isMobile);
   const [showFairValueOnChart, setShowFairValueOnChart] = useState(true);
 
   // Fetch data
@@ -333,7 +334,7 @@ export const StockDetailPage = () => {
             {company?.sectorDisplayName && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Branche:</span>
-                <span style={{ color: 'rgba(139, 92, 246, 1)', fontWeight: 600, fontSize: '0.95rem' }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
                   {company.sectorDisplayName}
                 </span>
               </div>
@@ -915,29 +916,62 @@ export const StockDetailPage = () => {
 
           .stock-detail-page .stock-page-header {
             padding: 0 0.75rem;
-            gap: 0.75rem;
+            gap: 0.5rem;
             flex-direction: column !important;
             align-items: center !important;
             text-align: center;
+            margin-bottom: 0.25rem !important;
           }
 
           .stock-detail-page .stock-page-header h1 {
             font-size: 1.5rem !important;
             width: 100%;
             text-align: center;
+            margin-bottom: -0.35rem !important;
           }
 
-          /* Stock info boxes: centered */
-          .stock-detail-page .stock-page-header > div {
-            gap: 0.75rem !important;
-            padding: 0.5rem 0.75rem !important;
+          /* Stock info box: single-line, compact, subtle, directly under name */
+          .stock-detail-page .stock-page-header > div:nth-child(2) {
+            gap: 1rem !important;
+            padding: 0 !important;
+            font-size: 0.75rem !important;
+            justify-content: center !important;
+            flex-wrap: nowrap !important;
+            border: none !important;
+            background: transparent !important;
+            margin-top: -0.1rem !important;
+          }
+          .stock-detail-page .stock-page-header > div:nth-child(2) > div {
+            flex-direction: row !important;
+            gap: 0.3rem !important;
+            align-items: baseline !important;
+          }
+          .stock-detail-page .stock-page-header > div:nth-child(2) span {
             font-size: 0.8rem !important;
+          }
+
+          /* Other header child divs */
+          .stock-detail-page .stock-page-header > div {
             justify-content: center !important;
           }
 
-          /* Favorite button: centered, not pushed right */
+          /* Favorite button: inline with company name as small star */
           .stock-detail-page .stock-page-header > div:last-child {
             margin-left: 0 !important;
+            position: absolute;
+            right: 0.75rem;
+            top: 0;
+          }
+          .stock-detail-page .stock-page-header {
+            position: relative;
+          }
+          .stock-detail-page .favorite-button {
+            padding: 0.35rem !important;
+            border: none !important;
+            background: transparent !important;
+          }
+          .stock-detail-page .favorite-button .favorite-button-text {
+            display: none !important;
           }
 
           /* Main grid: no gap on mobile, allow children to shrink */

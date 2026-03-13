@@ -415,6 +415,12 @@ export const Header = () => {
         .mobile-search {
           display: block !important;
         }
+        .mobile-search .company-search-input {
+          padding: 0.5rem 0.75rem !important;
+          padding-right: 2.25rem !important;
+          font-size: 0.875rem !important;
+          border-width: 1.5px !important;
+        }
 
         /* Desktop: hide burger + mobile menu + mobile search, show desktop nav + search */
         @media (min-width: 768px) {

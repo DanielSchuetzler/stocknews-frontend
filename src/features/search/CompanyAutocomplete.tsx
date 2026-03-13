@@ -107,6 +107,7 @@ export const CompanyAutocomplete: React.FC<CompanyAutocompleteProps> = ({
       <input
         ref={inputRef}
         type="text"
+        className="company-search-input"
         value={query}
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleKeyDown}
