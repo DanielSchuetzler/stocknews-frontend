@@ -510,7 +510,7 @@ export const StockDetailPage = () => {
                   fontWeight: 500,
                   opacity: 0.85
                 }}>
-                  Kursverlauf mit News-Events
+                  Kursverlauf mit Fair Value & News-Events
                 </span>
               </h2>
 
@@ -920,14 +920,14 @@ export const StockDetailPage = () => {
             flex-direction: column !important;
             align-items: center !important;
             text-align: center;
-            margin-bottom: 0.25rem !important;
+            margin-bottom: 1.25rem !important;
           }
 
           .stock-detail-page .stock-page-header h1 {
             font-size: 1.5rem !important;
             width: 100%;
             text-align: center;
-            margin-bottom: -0.35rem !important;
+            margin-bottom: -0.7rem !important;
           }
 
           /* Stock info box: single-line, compact, subtle, directly under name */
@@ -939,7 +939,7 @@ export const StockDetailPage = () => {
             flex-wrap: nowrap !important;
             border: none !important;
             background: transparent !important;
-            margin-top: -0.1rem !important;
+            margin-top: -0.2rem !important;
           }
           .stock-detail-page .stock-page-header > div:nth-child(2) > div {
             flex-direction: row !important;
@@ -972,6 +972,15 @@ export const StockDetailPage = () => {
           }
           .stock-detail-page .favorite-button .favorite-button-text {
             display: none !important;
+          }
+          .stock-detail-page .favorite-button[data-favorite="true"] {
+            color: #facc15 !important;
+          }
+
+          /* Fair Value Analyse box: no border on mobile */
+          .stock-detail-page .fair-value-explanation-box {
+            border: none !important;
+            border-radius: 0 !important;
           }
 
           /* Main grid: no gap on mobile, allow children to shrink */
@@ -1078,7 +1087,7 @@ export const StockDetailPage = () => {
             max-width: 340px;
             justify-content: center !important;
             border-radius: 12px !important;
-            border-width: 2px !important;
+            border: none !important;
           }
           .stock-detail-page .valuation-indicator > div:first-child,
           .stock-detail-page .valuation-indicator > div:last-child {

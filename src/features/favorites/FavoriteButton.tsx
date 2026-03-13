@@ -48,6 +48,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
   return (
     <button
       className="favorite-button"
+      data-favorite={isFavorite}
       onClick={handleClick}
       disabled={isLoading}
       title={isLoading ? 'Lädt...' : isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
@@ -62,7 +63,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
         borderRadius: '6px',
         borderColor: 'var(--border-color)',
         background: 'transparent',
-        color: isFavorite ? '#facc15' : 'var(--text-secondary)',
+        color: 'var(--text-secondary)',
         cursor: isLoading ? 'not-allowed' : 'pointer',
         transition: 'all 0.2s',
         opacity: isLoading ? 0.5 : 1
@@ -70,12 +71,12 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ ticker }) => {
       onMouseEnter={(e) => {
         if (!isLoading) {
           e.currentTarget.style.background = 'var(--surface-light)';
-          e.currentTarget.style.color = isFavorite ? '#facc15' : 'var(--text-primary)';
+          e.currentTarget.style.color = 'var(--text-primary)';
         }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent';
-        e.currentTarget.style.color = isFavorite ? '#facc15' : 'var(--text-secondary)';
+        e.currentTarget.style.color = 'var(--text-secondary)';
       }}
     >
       <svg

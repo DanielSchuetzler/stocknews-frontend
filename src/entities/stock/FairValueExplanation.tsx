@@ -55,7 +55,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
   const verdictTextColor = '#fff';
 
   return (
-    <div style={{
+    <div className="fair-value-explanation-box" style={{
       background: 'var(--surface, #1f2937)',
       borderRadius: '8px',
       border: '1px solid var(--border-color, #374151)',
