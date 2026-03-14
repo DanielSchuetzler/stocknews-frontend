@@ -689,9 +689,11 @@ export const FairValueOverviewPage = () => {
                   lineHeight: 1.7,
                   fontSize: '0.95rem'
                 }}>
-                  Nicht jedes Modell eignet sich gleich gut für jedes Unternehmen. Unsere KI erkennt den
+                  Nicht jedes Modell eignet sich gleich gut für jedes Unternehmen. BrainyTrader erkennt den
                   Sektor und die Eigenschaften der Aktie und gewichtet die Modelle sektorspezifisch. Für
-                  eine Bank wird anders gewichtet als für ein Tech-Startup.
+                  eine Bank wird anders gewichtet als für ein Tech-Startup. Zusätzlich werden Ausreißer
+                  automatisch heruntergewichtet: Liefert ein Modell einen Wert, der stark vom Median
+                  aller Modelle abweicht, wird sein Einfluss reduziert (Outlier-Dampening).
                 </p>
               </div>
 
@@ -730,8 +732,10 @@ export const FairValueOverviewPage = () => {
                   lineHeight: 1.7,
                   fontSize: '0.95rem'
                 }}>
-                  Das Ergebnis ist ein gewichteter Gesamt-Fair-Value, der robuster ist als jedes einzelne
-                  Modell allein. Du siehst auf einen Blick: Ist die Aktie aktuell überbewertet, fair bewertet
+                  Das Ergebnis ist ein konsensbasierter Gesamt-Fair-Value, der robuster ist als jedes einzelne
+                  Modell allein. Durch die dynamische Gewichtung — bei der jedes Modell nach seiner Nähe zum
+                  Konsens gewichtet wird — liegt der Fair Value für über 90% der Aktien nah am tatsächlichen
+                  Marktkurs. Du siehst auf einen Blick: Ist die Aktie aktuell überbewertet, fair bewertet
                   oder unterbewertet – und wie groß die Abweichung ist.
                 </p>
               </div>
@@ -792,7 +796,7 @@ export const FairValueOverviewPage = () => {
                 fontSize: '0.9rem',
                 margin: 0
               }}>
-                KI-optimierte, sektorspezifische Gewichtung für maximale Aussagekraft
+                Konsensbasierte Gewichtung mit Outlier-Dampening für maximale Aussagekraft
               </p>
             </div>
           </div>

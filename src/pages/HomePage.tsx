@@ -348,9 +348,9 @@ export const HomePage = () => {
                   fill="url(#chartGradient)"
                 />
                 {/* Fair Value Line (horizontal, dashed) */}
-                <line x1="10" y1="100" x2="285" y2="100" stroke="#10b981" strokeWidth="2" strokeDasharray="6,4" />
+                <line x1="10" y1="100" x2="285" y2="100" stroke="rgba(139, 92, 246, 1)" strokeWidth="2" strokeDasharray="6,4" />
                 {/* Fair Value Label */}
-                <text x="200" y="95" fill="#10b981" fontSize="10" fontWeight="600">Fair Value</text>
+                <text x="147" y="95" textAnchor="middle" fill="rgba(139, 92, 246, 1)" fontSize="10" fontWeight="600">Fair Value</text>
                 {/* Overvalued zone marker */}
                 <text x="225" y="35" fill="#ef4444" fontSize="9" fontWeight="500">Überbewertet</text>
                 {/* Undervalued zone marker */}
@@ -385,7 +385,7 @@ export const HomePage = () => {
                   <div style={{
                     width: '24px',
                     height: '2px',
-                    borderTop: '2px dashed #10b981'
+                    borderTop: '2px dashed rgba(139, 92, 246, 1)'
                   }} />
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     Fair Value

@@ -483,8 +483,9 @@ export const FairValueErtragswertPage = () => {
           <p style={pStyle}>
             BrainyTrader berechnet den Ertragswert automatisch mit mehreren Sicherheitsmechanismen: Die Wachstumsrate
             wird auf maximal 2/3 der Eigenkapitalkosten gedeckelt, um unrealistische Bewertungen zu vermeiden.
-            Außerdem wird der historische Durchschnitts-ROE über mehrere Jahre verwendet, um Ausreißer zu glätten.
-            Die KI gewichtet den Ertragswert besonders stark bei dividendenstarken, reifen Unternehmen.
+            Die Gewichtung im Gesamt-Fair-Value ist dynamisch: Weicht der Ertragswert stark vom Median
+            aller Modelle ab, wird sein Einfluss automatisch reduziert (Outlier-Dampening) — so wie
+            Investmentbanken bei Konsensus-Schätzungen Ausreißer identifizieren und heruntergewichten.
           </p>
           <Link to="/" style={{
             display: 'inline-block', background: 'var(--primary-color)', color: 'white',

@@ -1088,8 +1088,10 @@ export const FairValueDcfPage = () => {
           <p style={paragraphStyle}>
             Neben dem DCF-Verfahren setzt BrainyTrader drei weitere Bewertungsmodelle ein &ndash; die
             Graham-Formel, die PEG-Ratio (Peter Lynch) und das Ertragswertverfahren. Alle vier Methoden
-            werden zu einem gewichteten Gesamturteil zusammengef&uuml;hrt, damit du auf einen Blick
-            erkennen kannst, ob eine Aktie m&ouml;glicherweise unter- oder &uuml;berbewertet ist.
+            werden zu einem konsensbasierten Gesamturteil zusammengef&uuml;hrt. Dabei kommt
+            Outlier-Dampening zum Einsatz: Weicht ein einzelnes Modell stark vom Median aller Modelle ab,
+            wird sein Einfluss automatisch reduziert &ndash; so wie Investmentbanken bei
+            Konsensus-Sch&auml;tzungen Ausrei&szlig;er identifizieren und heruntergewichten.
           </p>
         </section>
 

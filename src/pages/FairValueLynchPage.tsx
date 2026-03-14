@@ -500,9 +500,9 @@ export const FairValueLynchPage = () => {
           </h2>
           <p style={pStyle}>
             BrainyTrader berechnet das PEG-Ratio automatisch für jede Aktie und leitet daraus einen fairen Wert ab.
-            Die KI gewichtet das PEG-Ratio besonders stark bei Wachstumsunternehmen (Technologie, Biotech, E-Commerce),
-            während es bei reifen Dividendenwerten weniger Gewicht erhält. Kombiniert mit DCF, Graham und Ertragswert
-            entsteht eine umfassende, ausgewogene Bewertung.
+            Die Gewichtung erfolgt sektorspezifisch und dynamisch: Weicht der Lynch-Wert stark vom Median
+            aller Modelle ab, wird sein Einfluss automatisch reduziert (Outlier-Dampening). Kombiniert mit DCF,
+            Graham und Ertragswert entsteht eine konsensbasierte, robuste Bewertung.
           </p>
           <Link to="/" style={{
             display: 'inline-block', background: 'var(--primary-color)', color: 'white',

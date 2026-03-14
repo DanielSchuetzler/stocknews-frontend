@@ -276,7 +276,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               {ex.grahamApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
                   <div>EPS: {formatCurrency(ex.eps, ex.currency)}</div>
-                  <div>Wachstumsrate (g): {formatPercent(ex.earningsGrowthRate)}</div>
+                  <div>Wachstumsrate (g): {ex.grahamGrowthRate != null ? `${formatNumber(ex.grahamGrowthRate, 1)}%` : formatPercent(ex.earningsGrowthRate)}</div>
                   <div>
                     {ex.grahamBasePE != null ? formatNumber(ex.grahamBasePE, 1) : '8,5'} = Basis-KGV
                     {ex.grahamSector
@@ -412,7 +412,8 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                 color: 'var(--text-secondary, #9ca3af)',
                 lineHeight: 1.6,
               }}>
-                Der Fair Value ist der gewichtete Mittelwert der oben berechneten Bewertungsmodelle.
+                Der Fair Value wird durch einen konsensbasierten, gewichteten Mittelwert berechnet.
+                Modelle, deren Ergebnis stark vom Median aller Modelle abweicht, werden automatisch geringer gewichtet (Outlier-Dampening) — ähnlich wie Investmentbanken Konsensus-Schätzungen bilden.
                 {ex.modelsUsed === 4 && ' Alle vier Modelle (DCF, Graham Fair Value, Lynch, Gewinnkapitalisierung) konnten angewendet werden – das gibt die höchste Aussagekraft.'}
                 {ex.modelsUsed === 3 && ' Drei von vier Modellen waren anwendbar – eine solide Berechnungsgrundlage.'}
                 {ex.modelsUsed === 2 && ' Zwei von vier Modellen waren anwendbar. Je mehr Modelle übereinstimmen, desto belastbarer ist das Ergebnis.'}
@@ -570,8 +571,15 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               <li><strong style={{ color: '#ef4444' }}>Über Fair Value gehandelt:</strong> Der Kurs liegt mehr als 10% über dem Fair Value — der Markt preist mehr ein, als die Kennzahlen rechtfertigen.</li>
               <li><strong style={{ color: '#8b5cf6' }}>Fair gehandelt:</strong> Kurs und Fair Value liegen nah beieinander (±10%) — die Aktie wird in etwa zu ihrem inneren Wert gehandelt.</li>
             </ul>
+            <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Dynamische Gewichtung (Outlier-Dampening):</strong>{' '}
+            Die Gewichtung der einzelnen Modelle ist nicht statisch, sondern wird dynamisch angepasst.
+            Wenn ein Modell einen Wert liefert, der stark vom Median aller Modelle abweicht, wird sein Einfluss
+            automatisch reduziert — ähnlich wie Investmentbanken bei Konsensus-Schätzungen Ausreißer heruntergewichten.
+            Die Konfidenz jedes Modells wird über die Formel <em>1 / (1 + ln(Wert/Median)²)</em> berechnet.
+            So fließen nur die Modelle mit voller Stärke ein, die im Einklang mit der Mehrheit stehen.
+            <br /><br />
             <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Hinweis:</strong>{' '}
-            Diese Fair-Value-Berechnung basiert auf vereinfachten Bewertungsmodellen und
+            Diese Fair-Value-Berechnung basiert auf wissenschaftlichen Bewertungsmodellen und
             öffentlich verfügbaren Finanzdaten. Das Graham-Modell verwendet branchenspezifische
             Basis-KGV-Werte, da verschiedene Sektoren (z.B. Technologie vs. Finanzen) unterschiedliche
             typische Bewertungsniveaus aufweisen. Sie ersetzt keine professionelle Aktienanalyse

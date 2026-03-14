@@ -46,7 +46,8 @@ export interface FairValueExplanation {
 
   // Graham model
   fairValueGraham: number | null;
-  grahamBasePE: number | null;      // Sector-specific base P/E (e.g., 30 for Tech, 8 for Financials)
+  grahamBasePE: number | null;      // Sector-specific base P/E (e.g., 20 for Tech, 7 for Financials)
+  grahamGrowthRate: number | null;  // Growth rate actually used (capped, whole number %)
   grahamSector: string | null;      // German sector name (e.g., "Technologie")
   grahamApplicable: boolean;
   grahamNote: string;
