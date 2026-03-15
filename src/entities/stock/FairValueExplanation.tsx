@@ -45,13 +45,16 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
   const [isExpanded, setIsExpanded] = useState(true);
   const ex = explanation;
 
-  const isUnder = ex.valuationVerdict === 'unter Fair Value gehandelt';
-  const isOver = ex.valuationVerdict === '\u00fcber Fair Value gehandelt';
-  const verdictColor = isUnder
-    ? 'var(--success-color, #10b981)'
-    : isOver
-      ? 'var(--danger-color, #ef4444)'
-      : '#8b5cf6';
+  const isUnder = ex.valuationVerdict?.includes('unter Fair Value');
+  const isOver = ex.valuationVerdict?.includes('über Fair Value');
+  const isExtremeDeviation = ex.valuationVerdict?.includes('Datenqualität prüfen');
+  const verdictColor = isExtremeDeviation
+    ? '#f59e0b' // amber warning for extreme deviations
+    : isUnder
+      ? 'var(--success-color, #10b981)'
+      : isOver
+        ? 'var(--danger-color, #ef4444)'
+        : '#8b5cf6';
   const verdictTextColor = '#fff';
 
   return (
@@ -215,13 +218,14 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               note={ex.dcfNote}
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
-                Projiziert den Free Cash Flow für 5 Jahre in die Zukunft und diskontiert
-                alle zukünftigen Zahlungsströme auf den heutigen Wert.
+                Projiziert den normalisierten Free Cash Flow (Median historischer Werte) für 5 Jahre
+                in die Zukunft und diskontiert alle zukünftigen Zahlungsströme auf den heutigen Wert.
+                Die FCF-Normalisierung glättet zyklische Spitzen (z.B. bei Automobilherstellern mit temporär hohen Margen).
                 {ex.grahamSector
-                  ? ` Diskontierungssatz und terminales Wachstum sind an die Branche "${ex.grahamSector}" angepasst, um das branchenspezifische Risikoprofil und Wachstumspotenzial widerzuspiegeln.`
-                  : ' Es werden die Standard-Parameter (10% Diskontierung, 2,5% terminales Wachstum) verwendet.'}
+                  ? ` Diskontierungssatz, terminales Wachstum und max. Wachstumsprognose sind an die Branche "${ex.grahamSector}" angepasst.`
+                  : ' Es werden die Standard-Parameter (10% Diskontierung, 2,5% terminales Wachstum, 20% max. Wachstum) verwendet.'}
               </p>
-              <FormulaBox formula="Fair Value = (Σ FCF_n / (1+r)^n + TV / (1+r)^5) / Aktien" />
+              <FormulaBox formula="Fair Value = (Σ FCF_norm × (1+g)^n / (1+r)^n + TV / (1+r)^5) / Aktien" />
               {ex.dcfApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
                   <div>Wachstumsrate: {formatPercent(ex.dcfGrowthRate)}</div>
@@ -326,12 +330,13 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                   ? ` Das PEG-Ziel wird branchenspezifisch angepasst (PEG ${formatNumber(ex.lynchPEGTarget, 1)} für ${ex.grahamSector ?? 'diese Branche'}), da hochwertige Branchen nachhaltig über PEG 1 gehandelt werden.`
                   : ' Ein fair gehandeltes Unternehmen hat ein KGV gleich seiner Wachstumsrate (PEG = 1).'
                 }
-                {' '}Verwendet das höhere von normalisiertem und Forward-EPS (zukunftsorientierter Ansatz).
+                {' '}Verwendet normalisiertes EPS (Median). Das Wachstum fließt über den Wachstums-Multiplikator ein.
+                Das implizierte KGV ist auf max. 30 gedeckelt.
                 Dieses Modell ist nur bei Wachstumsunternehmen mit mindestens 8% Gewinnwachstum aussagekräftig.
               </p>
               <FormulaBox formula={ex.lynchPEGTarget != null && ex.lynchPEGTarget > 1.01
-                ? `Fair Value = max(EPS_norm, EPS_fwd) × Wachstumsrate (%) × ${formatNumber(ex.lynchPEGTarget, 1).replace('.', ',')}`
-                : 'Fair Value = max(EPS_norm, EPS_fwd) × Wachstumsrate (%)'
+                ? `Fair Value = EPS_norm × min(Wachstumsrate (%) × ${formatNumber(ex.lynchPEGTarget, 1).replace('.', ',')}, 30)`
+                : 'Fair Value = EPS_norm × min(Wachstumsrate (%), 30)'
               } />
               {ex.lynchApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
@@ -342,9 +347,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                   </div>
                   {ex.forwardEps != null && (
                     <div>EPS (forward): {formatCurrency(ex.forwardEps, ex.currency)}
-                      {ex.normalizedEps != null && ex.forwardEps > ex.normalizedEps && (
-                        <span style={{ color: '#10b981' }}> (verwendet — höher als normalisiert)</span>
-                      )}
+                      <span style={{ color: 'var(--text-muted, #6b7280)' }}> (nicht verwendet — Wachstum über Multiplikator)</span>
                     </div>
                   )}
                   <div>Verwendete Wachstumsrate: {formatNumber(ex.lynchGrowthRate, 1)}%</div>
@@ -605,16 +608,18 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               <li><strong style={{ color: '#8b5cf6' }}>Fair gehandelt:</strong> Kurs und Fair Value liegen nah beieinander (±10%) — die Aktie wird in etwa zu ihrem inneren Wert gehandelt.</li>
             </ul>
             <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Normalisiertes EPS:</strong>{' '}
-            Alle EPS-basierten Modelle (Graham, Lynch, Gewinnkapitalisierung) verwenden den Median der
-            historischen Gewinne pro Aktie statt des aktuellen Trailing-EPS. Dadurch werden einmalige
-            Sondergewinne, zyklische Spitzen und außerordentliche Erträge automatisch geglättet.
-            Dies verhindert, dass z.B. bei einem Automobilhersteller mit temporär hohen Gewinnen
-            der Fair Value unrealistisch hoch ausfällt.
+            Alle EPS-basierten Modelle verwenden den Median der historischen Gewinne pro Aktie
+            statt des aktuellen Trailing-EPS. Dadurch werden einmalige Sondergewinne, zyklische Spitzen
+            und außerordentliche Erträge automatisch geglättet.
+            Eine Untergrenze von 50% des besten aktuellen EPS-Schätzwerts (Trailing oder Forward)
+            verhindert, dass Unternehmen in struktureller Transformation (z.B. Cloud-Umstellung)
+            durch historisch niedrige Gewinne unfair bewertet werden.
+            Lynch und Gewinnkapitalisierung nutzen zusätzlich das Forward-EPS, wenn es höher ist als das normalisierte EPS.
             <br /><br />
             <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Branchenspezifische KGV-Caps:</strong>{' '}
             Graham Fair Value: max. KGV-Multiplikator je nach Branche (z.B. 14 für Finanzen, 35 für Technologie).
             Gewinnkapitalisierung: max. impliziertes KGV von 35.
-            Peter Lynch: branchenspezifischer PEG-Qualitätsfaktor (z.B. 1,5 für Technologie).
+            Peter Lynch: branchenspezifischer PEG-Qualitätsfaktor (z.B. 1,2 für Technologie) mit impliziertem Max-KGV von 30.
             Diese Parameter verhindern unrealistische Bewertungen und berücksichtigen, dass verschiedene Branchen
             strukturell unterschiedliche Bewertungsniveaus aufweisen.
             <br /><br />
