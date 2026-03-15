@@ -347,11 +347,12 @@ export const StockDetailPage = () => {
             const fv = hasFV ? fairValueData!.explanation.fairValueCombined! : null;
             const verdict = fairValueData?.explanation?.valuationVerdict;
             const upside = fairValueData?.explanation?.upsidePercent;
-            const isUnder = verdict === 'unter Fair Value gehandelt';
-            const isOver = verdict === 'über Fair Value gehandelt';
+            const isUnder = verdict?.includes('unter Fair Value');
+            const isOver = verdict?.includes('über Fair Value');
+            const isExtremeDeviation = verdict?.includes('Datenqualität prüfen');
             const isFair = !isUnder && !isOver;
-            const accentColor = isUnder ? '#10b981' : isOver ? '#ef4444' : '#8b5cf6';
-            const accentRgb = isUnder ? '16,185,129' : isOver ? '239,68,68' : '139,92,246';
+            const accentColor = isExtremeDeviation ? '#f59e0b' : isUnder ? '#10b981' : isOver ? '#ef4444' : '#8b5cf6';
+            const accentRgb = isExtremeDeviation ? '245,158,11' : isUnder ? '16,185,129' : isOver ? '239,68,68' : '139,92,246';
             const currSym = stockData.currency === 'USD' ? '$' : stockData.currency;
 
             if (!hasFV) {
@@ -451,9 +452,12 @@ export const StockDetailPage = () => {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.06em',
-                    whiteSpace: 'nowrap',
+                    textAlign: 'center',
+                    lineHeight: 1.3,
                   }}>
-                    {verdict}
+                    {verdict?.split(' – ').map((part: string, i: number) => (
+                      <span key={i}>{i > 0 && <br />}{part}</span>
+                    ))}
                   </div>
                 </div>
 

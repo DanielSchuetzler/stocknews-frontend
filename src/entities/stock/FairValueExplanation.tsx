@@ -136,14 +136,20 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               )}
               {ex.valuationVerdict && ex.upsidePercent != null && (
                 <span style={{
+                  display: 'inline-block',
                   padding: '0.2rem 0.6rem',
                   borderRadius: '4px',
                   fontSize: '0.8rem',
                   fontWeight: 700,
                   color: verdictTextColor,
                   background: verdictColor,
+                  textAlign: 'center',
+                  lineHeight: 1.4,
                 }}>
-                  {ex.valuationVerdict} ({ex.upsidePercent > 0 ? '+' : ''}{ex.upsidePercent}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''})
+                  {ex.valuationVerdict?.split(' – ').map((part, i) => (
+                    <span key={i}>{i > 0 && <br />}{part}</span>
+                  ))}
+                  <br />({ex.upsidePercent > 0 ? '+' : ''}{ex.upsidePercent}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''})
                 </span>
               )}
             </div>
@@ -497,8 +503,13 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                       fontWeight: 700,
                       color: verdictTextColor,
                       background: verdictColor,
+                      textAlign: 'center',
+                      lineHeight: 1.4,
                     }}>
-                      {ex.valuationVerdict} ({ex.upsidePercent > 0 ? '+' : ''}{ex.upsidePercent}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''})
+                      {ex.valuationVerdict?.split(' – ').map((part, i) => (
+                        <span key={i}>{i > 0 && <br />}{part}</span>
+                      ))}
+                      <br />({ex.upsidePercent > 0 ? '+' : ''}{ex.upsidePercent}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''})
                     </span>
                   </div>
                 )}
