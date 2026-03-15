@@ -481,8 +481,10 @@ export const FairValueErtragswertPage = () => {
             So nutzt BrainyTrader das Ertragswertverfahren
           </h2>
           <p style={pStyle}>
-            BrainyTrader berechnet den Ertragswert automatisch mit mehreren Sicherheitsmechanismen: Die Wachstumsrate
-            wird auf maximal 2/3 der Eigenkapitalkosten gedeckelt, um unrealistische Bewertungen zu vermeiden.
+            BrainyTrader berechnet den Ertragswert automatisch mit mehreren Sicherheitsmechanismen:
+            Statt des aktuellen Trailing-EPS wird das <strong style={{ color: 'var(--text-primary)' }}>normalisierte EPS</strong> (Median
+            der historischen Gewinne) verwendet — dadurch werden Sondereffekte und zyklische Spitzen automatisch geglättet.
+            Die Wachstumsrate wird auf maximal 6% gedeckelt, das implizierte KGV auf maximal 35 begrenzt.
             Die Gewichtung im Gesamt-Fair-Value ist dynamisch: Weicht der Ertragswert stark vom Median
             aller Modelle ab, wird sein Einfluss automatisch reduziert (Outlier-Dampening) — so wie
             Investmentbanken bei Konsensus-Schätzungen Ausreißer identifizieren und heruntergewichten.

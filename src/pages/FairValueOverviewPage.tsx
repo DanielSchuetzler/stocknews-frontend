@@ -650,7 +650,8 @@ export const FairValueOverviewPage = () => {
                   fontSize: '0.95rem'
                 }}>
                   Für jede Aktie berechnet BrainyTrader den Fair Value mit allen vier Methoden gleichzeitig:
-                  DCF, Graham, Lynch und Ertragswert. So entsteht ein vielschichtiges Bild des inneren Werts.
+                  DCF, Graham, Lynch und Ertragswert. Dabei wird normalisiertes EPS (Median der historischen Gewinne)
+                  verwendet, um Sondereffekte und zyklische Spitzen zu glätten. So entsteht ein vielschichtiges Bild des inneren Werts.
                 </p>
               </div>
 
@@ -691,9 +692,10 @@ export const FairValueOverviewPage = () => {
                 }}>
                   Nicht jedes Modell eignet sich gleich gut für jedes Unternehmen. BrainyTrader erkennt den
                   Sektor und die Eigenschaften der Aktie und gewichtet die Modelle sektorspezifisch. Für
-                  eine Bank wird anders gewichtet als für ein Tech-Startup. Zusätzlich werden Ausreißer
-                  automatisch heruntergewichtet: Liefert ein Modell einen Wert, der stark vom Median
-                  aller Modelle abweicht, wird sein Einfluss reduziert (Outlier-Dampening).
+                  eine Bank wird anders gewichtet als für ein Tech-Startup. KGV-Multiplikatoren werden
+                  durch branchenspezifische Obergrenzen (Graham: z.B. max. 14 fuer Finanzen, 35 fuer Tech; Gewinnkapitalisierung: max. 35) vor extremen Werten geschützt.
+                  Zusätzlich werden Ausreißer automatisch heruntergewichtet: Liefert ein Modell einen Wert,
+                  der stark vom Median aller Modelle abweicht, wird sein Einfluss reduziert (Outlier-Dampening).
                 </p>
               </div>
 

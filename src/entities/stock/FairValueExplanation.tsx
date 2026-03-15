@@ -185,6 +185,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               borderRadius: '6px',
             }}>
               <DataItem label="EPS (trailing)" value={formatCurrency(ex.eps, ex.currency)} />
+              <DataItem label="EPS (normalisiert)" value={formatCurrency(ex.normalizedEps, ex.currency)} />
               <DataItem label="EPS (forward)" value={formatCurrency(ex.forwardEps, ex.currency)} />
               <DataItem label="Buchwert/Aktie" value={formatCurrency(ex.bookValuePerShare, ex.currency)} />
               <DataItem label="Free Cash Flow" value={formatLargeNumber(ex.freeCashFlow)} />
@@ -267,16 +268,22 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
                 Benjamin Grahams Intrinsic-Value-Formel aus "The Intelligent Investor".
-                Bewertet eine Aktie basierend auf dem aktuellen Gewinn und der erwarteten Wachstumsrate.
+                Bewertet eine Aktie basierend auf dem normalisierten Gewinn (Median-EPS) und der erwarteten Wachstumsrate.
+                Das resultierende KGV wird branchenspezifisch gedeckelt (z.B. max. {ex.grahamMaxPE != null ? Math.round(ex.grahamMaxPE) : 20} für {ex.grahamSector ?? 'diese Branche'}), um unrealistische Bewertungen zu verhindern.
                 {ex.grahamSector
-                  ? ` Das Basis-KGV wurde an die Branche "${ex.grahamSector}" angepasst, da verschiedene Branchen unterschiedliche typische Bewertungsmultiplikatoren aufweisen.`
+                  ? ` Basis-KGV und Max-KGV sind an die Branche "${ex.grahamSector}" angepasst, da verschiedene Branchen unterschiedliche typische Bewertungsmultiplikatoren aufweisen.`
                   : ' Es wird das Standard-KGV von 8,5 (Grahams Original) verwendet, da keine Branche zugewiesen ist.'}
               </p>
-              <FormulaBox formula={`Fair Value = EPS × (${ex.grahamBasePE != null ? formatNumber(ex.grahamBasePE, 1).replace('.', ',') : '8,5'} + 2 × g)`} />
+              <FormulaBox formula={`Fair Value = EPS_norm × min(${ex.grahamBasePE != null ? formatNumber(ex.grahamBasePE, 1).replace('.', ',') : '8,5'} + 2 × g, ${ex.grahamMaxPE != null ? Math.round(ex.grahamMaxPE) : 20})`} />
               {ex.grahamApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
-                  <div>EPS: {formatCurrency(ex.eps, ex.currency)}</div>
-                  <div>Wachstumsrate (g): {ex.grahamGrowthRate != null ? `${formatNumber(ex.grahamGrowthRate, 1)}%` : formatPercent(ex.earningsGrowthRate)}</div>
+                  <div>EPS (normalisiert): {formatCurrency(ex.normalizedEps ?? ex.eps, ex.currency)}
+                    {ex.normalizedEps != null && ex.eps != null && Math.abs(ex.normalizedEps - ex.eps) > 0.01 && (
+                      <span style={{ color: 'rgba(139, 92, 246, 0.8)' }}> (Trailing: {formatCurrency(ex.eps, ex.currency)})</span>
+                    )}
+                  </div>
+                  <div>Wachstumsrate (g): {ex.grahamGrowthRate != null ? `${formatNumber(ex.grahamGrowthRate, 1)}%` : formatPercent(ex.earningsGrowthRate)} <span style={{ color: 'var(--text-muted, #6b7280)' }}>(max. 15%)</span></div>
+                  <div>KGV-Cap: max. {ex.grahamMaxPE != null ? Math.round(ex.grahamMaxPE) : 20} (branchenspezifischer Cap)</div>
                   <div>
                     {ex.grahamBasePE != null ? formatNumber(ex.grahamBasePE, 1) : '8,5'} = Basis-KGV
                     {ex.grahamSector
@@ -315,15 +322,35 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
                 Peter Lynchs PEG-basierte Bewertung aus "One Up on Wall Street".
-                Ein fair gehandeltes Unternehmen hat ein KGV gleich seiner Wachstumsrate.
-                Dieses Modell ist nur bei Wachstumsunternehmen mit mindestens 8% Gewinnwachstum aussagekräftig — bei niedrigerem Wachstum liefert die Formel unrealistisch niedrige Werte.
+                {ex.lynchPEGTarget != null && ex.lynchPEGTarget > 1.01
+                  ? ` Das PEG-Ziel wird branchenspezifisch angepasst (PEG ${formatNumber(ex.lynchPEGTarget, 1)} für ${ex.grahamSector ?? 'diese Branche'}), da hochwertige Branchen nachhaltig über PEG 1 gehandelt werden.`
+                  : ' Ein fair gehandeltes Unternehmen hat ein KGV gleich seiner Wachstumsrate (PEG = 1).'
+                }
+                {' '}Verwendet das höhere von normalisiertem und Forward-EPS (zukunftsorientierter Ansatz).
+                Dieses Modell ist nur bei Wachstumsunternehmen mit mindestens 8% Gewinnwachstum aussagekräftig.
               </p>
-              <FormulaBox formula="Fair Value = EPS × Wachstumsrate (%)" />
+              <FormulaBox formula={ex.lynchPEGTarget != null && ex.lynchPEGTarget > 1.01
+                ? `Fair Value = max(EPS_norm, EPS_fwd) × Wachstumsrate (%) × ${formatNumber(ex.lynchPEGTarget, 1).replace('.', ',')}`
+                : 'Fair Value = max(EPS_norm, EPS_fwd) × Wachstumsrate (%)'
+              } />
               {ex.lynchApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
-                  <div>EPS: {formatCurrency(ex.eps, ex.currency)}</div>
+                  <div>EPS (normalisiert): {formatCurrency(ex.normalizedEps ?? ex.eps, ex.currency)}
+                    {ex.normalizedEps != null && ex.eps != null && Math.abs(ex.normalizedEps - ex.eps) > 0.01 && (
+                      <span style={{ color: 'rgba(139, 92, 246, 0.8)' }}> (Trailing: {formatCurrency(ex.eps, ex.currency)})</span>
+                    )}
+                  </div>
+                  {ex.forwardEps != null && (
+                    <div>EPS (forward): {formatCurrency(ex.forwardEps, ex.currency)}
+                      {ex.normalizedEps != null && ex.forwardEps > ex.normalizedEps && (
+                        <span style={{ color: '#10b981' }}> (verwendet — höher als normalisiert)</span>
+                      )}
+                    </div>
+                  )}
                   <div>Verwendete Wachstumsrate: {formatNumber(ex.lynchGrowthRate, 1)}%</div>
-                  <div>PEG = 1 bedeutet fair gehandelt</div>
+                  {ex.lynchPEGTarget != null && ex.lynchPEGTarget > 1.01 && (
+                    <div>PEG-Qualitätsfaktor: {formatNumber(ex.lynchPEGTarget, 1)} ({ex.grahamSector ?? 'Branche'})</div>
+                  )}
                 </div>
               )}
               {dataPoints && dataPoints.some(dp => dp.fairValueLynch != null) && (
@@ -358,13 +385,18 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                 Gordon-Growth-Modell: Bewertet eine Aktie anhand der nachhaltigen Gewinnwachstumsrate
                 und der geforderten Eigenkapitalrendite (Cost of Equity).
               </p>
-              <FormulaBox formula="Fair Value = EPS × (1 + g) / (r - g)" />
+              <FormulaBox formula="Fair Value = EPS_norm × (1 + g) / (r - g)" />
               {ex.earningsCapApplicable && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted, #6b7280)' }}>
-                  <div>EPS: {formatCurrency(ex.eps, ex.currency)}</div>
+                  <div>EPS (normalisiert): {formatCurrency(ex.normalizedEps ?? ex.eps, ex.currency)}
+                    {ex.normalizedEps != null && ex.eps != null && Math.abs(ex.normalizedEps - ex.eps) > 0.01 && (
+                      <span style={{ color: 'rgba(139, 92, 246, 0.8)' }}> (Trailing: {formatCurrency(ex.eps, ex.currency)})</span>
+                    )}
+                  </div>
                   <div>Nachhaltiges Wachstum (g): {formatPercent(ex.earningsCapGrowthRate)}</div>
                   <div>Cost of Equity (r): {formatPercent(ex.earningsCapCostOfEquity)}</div>
                   <div>g = min(Wachstumsrate × 50%, 6%) – konservativ gedämpft</div>
+                  <div>Maximales impliziertes KGV: 35 (Realitäts-Cap)</div>
                 </div>
               )}
               {dataPoints && dataPoints.some(dp => dp.fairValueEarningsCap != null) && (
@@ -413,6 +445,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                 lineHeight: 1.6,
               }}>
                 Der Fair Value wird durch einen konsensbasierten, gewichteten Mittelwert berechnet.
+                Alle EPS-basierten Modelle verwenden normalisiertes EPS (Median der historischen Gewinne), um Sondereffekte und zyklische Spitzen zu glätten.
                 Modelle, deren Ergebnis stark vom Median aller Modelle abweicht, werden automatisch geringer gewichtet (Outlier-Dampening) — ähnlich wie Investmentbanken Konsensus-Schätzungen bilden.
                 {ex.modelsUsed === 4 && ' Alle vier Modelle (DCF, Graham Fair Value, Lynch, Gewinnkapitalisierung) konnten angewendet werden – das gibt die höchste Aussagekraft.'}
                 {ex.modelsUsed === 3 && ' Drei von vier Modellen waren anwendbar – eine solide Berechnungsgrundlage.'}
@@ -571,11 +604,25 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               <li><strong style={{ color: '#ef4444' }}>Über Fair Value gehandelt:</strong> Der Kurs liegt mehr als 10% über dem Fair Value — der Markt preist mehr ein, als die Kennzahlen rechtfertigen.</li>
               <li><strong style={{ color: '#8b5cf6' }}>Fair gehandelt:</strong> Kurs und Fair Value liegen nah beieinander (±10%) — die Aktie wird in etwa zu ihrem inneren Wert gehandelt.</li>
             </ul>
+            <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Normalisiertes EPS:</strong>{' '}
+            Alle EPS-basierten Modelle (Graham, Lynch, Gewinnkapitalisierung) verwenden den Median der
+            historischen Gewinne pro Aktie statt des aktuellen Trailing-EPS. Dadurch werden einmalige
+            Sondergewinne, zyklische Spitzen und außerordentliche Erträge automatisch geglättet.
+            Dies verhindert, dass z.B. bei einem Automobilhersteller mit temporär hohen Gewinnen
+            der Fair Value unrealistisch hoch ausfällt.
+            <br /><br />
+            <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Branchenspezifische KGV-Caps:</strong>{' '}
+            Graham Fair Value: max. KGV-Multiplikator je nach Branche (z.B. 14 für Finanzen, 35 für Technologie).
+            Gewinnkapitalisierung: max. impliziertes KGV von 35.
+            Peter Lynch: branchenspezifischer PEG-Qualitätsfaktor (z.B. 1,5 für Technologie).
+            Diese Parameter verhindern unrealistische Bewertungen und berücksichtigen, dass verschiedene Branchen
+            strukturell unterschiedliche Bewertungsniveaus aufweisen.
+            <br /><br />
             <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Dynamische Gewichtung (Outlier-Dampening):</strong>{' '}
             Die Gewichtung der einzelnen Modelle ist nicht statisch, sondern wird dynamisch angepasst.
             Wenn ein Modell einen Wert liefert, der stark vom Median aller Modelle abweicht, wird sein Einfluss
             automatisch reduziert — ähnlich wie Investmentbanken bei Konsensus-Schätzungen Ausreißer heruntergewichten.
-            Die Konfidenz jedes Modells wird über die Formel <em>1 / (1 + ln(Wert/Median)²)</em> berechnet.
+            Die Konfidenz jedes Modells wird über die Formel <em>1 / (1 + 2 × ln(Wert/Median)²)</em> berechnet.
             So fließen nur die Modelle mit voller Stärke ein, die im Einklang mit der Mehrheit stehen.
             <br /><br />
             <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>Hinweis:</strong>{' '}

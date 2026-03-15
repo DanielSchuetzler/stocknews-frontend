@@ -24,6 +24,7 @@ export interface FairValueExplanation {
 
   // Input data
   eps: number | null;
+  normalizedEps: number | null;    // Median EPS (smoothed over historical data)
   forwardEps: number | null;
   bookValuePerShare: number | null;
   freeCashFlow: number | null;
@@ -47,6 +48,7 @@ export interface FairValueExplanation {
   // Graham model
   fairValueGraham: number | null;
   grahamBasePE: number | null;      // Sector-specific base P/E (e.g., 20 for Tech, 7 for Financials)
+  grahamMaxPE: number | null;       // Sector-specific max P/E cap (e.g., 35 for Tech, 14 for Financials)
   grahamGrowthRate: number | null;  // Growth rate actually used (capped, whole number %)
   grahamSector: string | null;      // German sector name (e.g., "Technologie")
   grahamApplicable: boolean;
@@ -55,6 +57,7 @@ export interface FairValueExplanation {
   // Lynch model
   fairValueLynch: number | null;
   lynchGrowthRate: number | null;
+  lynchPEGTarget: number | null;
   lynchApplicable: boolean;
   lynchNote: string;
 
