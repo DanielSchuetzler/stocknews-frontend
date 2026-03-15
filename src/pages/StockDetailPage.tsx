@@ -214,21 +214,52 @@ export const StockDetailPage = () => {
   const currencySymbol = stockData.currency === 'USD' ? '$' : stockData.currency === 'EUR' ? '€' : stockData.currency;
   const exchange = company?.exchange || stockData.exchange || '';
 
-  // SEO: Einprägsame, informative Meta-Texte
-  const pageTitle = `${companyName} (${ticker}) Aktie – Fair Value & AI-Analyse | BrainyTrader`;
-  const metaDescription = `${companyName} (${ticker}): Kurs ${latestPrice} ${currencySymbol} – ist die Aktie über- oder unterbewertet? KI-gestützte Fair Value Analyse mit DCF, Graham & mehr. Jetzt kostenlos prüfen.`;
-  const ogTitle = `${companyName} (${ticker}) – Fair Value & AI-Bewertung`;
-  const ogDescription = `Ist ${companyName} über- oder unterbewertet? KI-gestützte Fair Value Analyse, News-Impact-Visualisierung und 4 wissenschaftliche Bewertungsmodelle – kostenlos auf BrainyTrader.`;
+  // SEO: Catchy Meta-Texte mit echten Fair Value Zahlen
+  const fairValue = fairValueData?.explanation?.fairValueCombined;
+  const fairValuePrice = fairValueData?.explanation?.currentPrice;
+  const verdict = fairValueData?.explanation?.valuationVerdict;
+  const upsidePercent = fairValueData?.explanation?.upsidePercent;
+
+  // Dynamic catchy description – "Fair Value" immer am Anfang für SEO-Ranking
+  let metaDescription: string;
+  if (fairValue && fairValuePrice && verdict && upsidePercent !== null && upsidePercent !== undefined) {
+    const fvFormatted = fairValue.toFixed(2);
+    const priceFormatted = fairValuePrice.toFixed(2);
+    const absUpside = Math.abs(upsidePercent).toFixed(0);
+    if (verdict.includes('unter')) {
+      metaDescription = `Fair Value ${companyName} (${ticker}): ${fvFormatted} ${currencySymbol} – aktueller Kurs nur ${priceFormatted} ${currencySymbol}. ${absUpside}% unterbewertet laut KI-Analyse! Jetzt kostenlos prüfen auf BrainyTrader.`;
+    } else if (verdict.includes('über')) {
+      metaDescription = `Fair Value ${companyName} (${ticker}): ${fvFormatted} ${currencySymbol} – Kurs ${priceFormatted} ${currencySymbol} liegt ${absUpside}% über dem fairen Wert. KI-gestützte Analyse auf BrainyTrader.`;
+    } else {
+      metaDescription = `Fair Value ${companyName} (${ticker}): ${fvFormatted} ${currencySymbol} – Kurs ${priceFormatted} ${currencySymbol}. Aktie ist fair bewertet. KI-Analyse mit DCF, Graham & mehr auf BrainyTrader.`;
+    }
+  } else {
+    metaDescription = `Fair Value ${companyName} (${ticker}): Aktueller Kurs ${latestPrice} ${currencySymbol} – über- oder unterbewertet? KI-gestützte Analyse mit 4 Modellen. Kostenlos auf BrainyTrader.`;
+  }
+
+  // Title: "Fair Value" vorne für SEO-Ranking bei "[Company] Fair Value" Suchen
+  const pageTitle = `${companyName} (${ticker}) Fair Value – KI-Aktienanalyse | BrainyTrader`;
+  const ogTitle = `${companyName} Fair Value – Über- oder unterbewertet? | BrainyTrader`;
+  const ogDescription = fairValue && fairValuePrice
+    ? `Fair Value ${companyName}: ${fairValue.toFixed(2)} ${currencySymbol} vs. Kurs ${fairValuePrice.toFixed(2)} ${currencySymbol}. KI-Bewertung mit DCF, Graham, Lynch & Ertragswert – kostenlos auf BrainyTrader.`
+    : `Fair Value ${companyName} – über- oder unterbewertet? KI-gestützte Analyse mit 4 wissenschaftlichen Modellen. Kostenlos auf BrainyTrader.`;
   const canonicalUrl = `https://brainytrader.info/stocks/${ticker}`;
 
   // JSON-LD: Strukturierte Daten für die Stock-Seite
-  const stockJsonLd = {
+  const stockJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": `${companyName} (${ticker}) Aktienanalyse`,
+    "name": `${companyName} (${ticker}) Fair Value – KI-Aktienanalyse`,
     "description": metaDescription,
     "url": canonicalUrl,
     "inLanguage": "de",
+    "dateModified": new Date().toISOString().split('T')[0],
+    "publisher": {
+      "@type": "Organization",
+      "name": "BrainyTrader",
+      "url": "https://brainytrader.info",
+      "logo": "https://brainytrader.info/logo.png"
+    },
     "isPartOf": {
       "@type": "WebSite",
       "name": "BrainyTrader",
@@ -260,6 +291,30 @@ export const StockDetailPage = () => {
     }
   };
 
+  // Add FAQPage schema for rich snippets in Google
+  const faqJsonLd = fairValue && fairValuePrice ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `Was ist der Fair Value von ${companyName} (${ticker})?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `Der KI-berechnete Fair Value von ${companyName} (${ticker}) liegt bei ${fairValue.toFixed(2)} ${currencySymbol}. Der aktuelle Kurs beträgt ${fairValuePrice.toFixed(2)} ${currencySymbol}. Die Aktie wird laut BrainyTrader als ${verdict || 'bewertet'} eingestuft.`
+        }
+      },
+      {
+        "@type": "Question",
+        "name": `Ist ${companyName} (${ticker}) über- oder unterbewertet?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `${companyName} wird aktuell ${verdict || 'bewertet'}. ${upsidePercent !== null && upsidePercent !== undefined ? (upsidePercent > 0 ? `Es besteht ein Upside-Potenzial von ${Math.abs(upsidePercent).toFixed(0)}%.` : `Die Aktie liegt ${Math.abs(upsidePercent).toFixed(0)}% über dem fairen Wert.`) : ''} BrainyTrader nutzt 4 Modelle: DCF, Graham, Lynch und Ertragswert.`
+        }
+      }
+    ]
+  } : null;
+
   return (
     <>
       {/* SEO Meta Tags */}
@@ -286,6 +341,9 @@ export const StockDetailPage = () => {
 
         {/* Structured Data  */}
         <script type="application/ld+json">{JSON.stringify(stockJsonLd)}</script>
+        {faqJsonLd && (
+          <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+        )}
       </Helmet>
 
       {/* Container - Max 1400px like original */}
