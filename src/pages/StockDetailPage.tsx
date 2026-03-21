@@ -39,6 +39,7 @@ export const StockDetailPage = () => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   const [showNewsOnChart, setShowNewsOnChart] = useState(!isMobile);
   const [showFairValueOnChart, setShowFairValueOnChart] = useState(true);
+  const [activeTab, setActiveTab] = useState<'fairvalue' | 'news'>('fairvalue');
 
   // Fetch data
   const { data: stockData, isLoading: stockLoading, error: stockError } = useStockData(ticker || '');
@@ -154,6 +155,7 @@ export const StockDetailPage = () => {
   const handleNewsClick = useCallback((newsId: number) => {
     // Highlight the clicked news item
     setHighlightedNewsId(newsId);
+    setActiveTab('news');
 
     const newsElement = document.getElementById(`news-${newsId}`);
     const pageHeader = document.querySelector('.stock-page-header');
@@ -402,6 +404,104 @@ export const StockDetailPage = () => {
     ]
   } : null;
 
+  // Valuation indicator JSX (shared between mobile header and desktop tab panel)
+  const valuationIndicatorJsx = currentPrice != null ? (() => {
+    const hasFV = fairValueData?.explanation?.fairValueCombined != null;
+    const fv = hasFV ? fairValueData!.explanation.fairValueCombined! : null;
+    const fvVerdict = fairValueData?.explanation?.valuationVerdict;
+    const upside = fairValueData?.explanation?.upsidePercent;
+    const isUnder = fvVerdict?.includes('unter Fair Value');
+    const isOver = fvVerdict?.includes('über Fair Value');
+    const isExtremeDeviation = fvVerdict?.includes('Datenqualität prüfen');
+    const isFair = !isUnder && !isOver;
+    const accentColor = isExtremeDeviation ? '#f59e0b' : isUnder ? '#10b981' : isOver ? '#ef4444' : '#8b5cf6';
+    const accentRgb = isExtremeDeviation ? '245,158,11' : isUnder ? '16,185,129' : isOver ? '239,68,68' : '139,92,246';
+    const currSym = stockData.currency === 'USD' ? '$' : stockData.currency;
+
+    if (!hasFV) {
+      return (
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          padding: '0.75rem 1.25rem',
+          background: 'var(--surface)',
+          borderRadius: '8px',
+          border: '1px solid var(--border-color)',
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aktueller Kurs:</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem' }}>
+              {currentPrice.toFixed(2)} {currSym}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    const absUpside = upside != null ? Math.abs(upside) : 0;
+    const fvFormatted = `${fv!.toFixed(2)} ${currSym}`;
+    const priceFormatted = `${currentPrice.toFixed(2)} ${currSym}`;
+    const isLowConf = fairValueData?.explanation?.lowConfidence;
+
+    // Bold numbers for seoText
+    const b = (txt: string, color?: string) => (
+      <strong style={{ fontWeight: 700, color: color || 'var(--text-primary)' }}>{txt}</strong>
+    );
+    let seoTextJsx: React.ReactNode;
+    if (isUnder && isExtremeDeviation) {
+      seoTextJsx = <>{companyName} wird deutlich unter dem berechneten Fair Value von {b(fvFormatted, accentColor)} gehandelt. Beim aktuellen Kurs von {b(priceFormatted)} ergibt sich ein rechnerisches Kurspotential von {b(`${absUpside}%`, accentColor)}.</>;
+    } else if (isOver && isExtremeDeviation) {
+      seoTextJsx = <>{companyName} wird deutlich über dem berechneten Fair Value von {b(fvFormatted, accentColor)} gehandelt. Beim aktuellen Kurs von {b(priceFormatted)} besteht ein rechnerisches Kursrückfallrisiko von {b(`${absUpside}%`, accentColor)}.</>;
+    } else if (isUnder) {
+      seoTextJsx = <>{companyName} wird unter Fair Value gehandelt. Beim aktuellen Kurs von {b(priceFormatted)} ergibt sich ein Kurspotential von {b(`${absUpside}%`, accentColor)} zum berechneten Fair Value von {b(fvFormatted, accentColor)}.</>;
+    } else if (isOver) {
+      seoTextJsx = <>{companyName} wird über Fair Value gehandelt. Beim aktuellen Kurs von {b(priceFormatted)} besteht ein Kursrückfallrisiko von {b(`${absUpside}%`, accentColor)} zum berechneten Fair Value von {b(fvFormatted, accentColor)}.</>;
+    } else {
+      seoTextJsx = <>{companyName} wird nahe dem berechneten Fair Value von {b(fvFormatted, accentColor)} gehandelt. Der aktuelle Kurs von {b(priceFormatted)} weicht nur {b(`${absUpside}%`, accentColor)} ab — die Aktie erscheint fair bewertet.</>;
+    }
+
+    return (
+      <div className="valuation-indicator" style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        padding: '0.5rem 1rem',
+        background: `linear-gradient(135deg, rgba(${accentRgb}, 0.06), rgba(${accentRgb}, 0.02))`,
+        borderRadius: '12px',
+        border: `1px solid rgba(${accentRgb}, 0.2)`,
+        flexShrink: 0,
+        width: '100%',
+        boxSizing: 'border-box',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+          <div style={{ textAlign: 'center', minWidth: '65px' }}>
+            <div className="vi-label" style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>Kurs</div>
+            <div className="vi-value" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f3f4f6)' }}>{currentPrice.toFixed(2)}</div>
+            <div className="vi-currency" style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
+          </div>
+          <div className="vi-arrow-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 0.6rem', minWidth: '70px', flex: '0 1 auto' }}>
+            <div className="vi-pill" style={{ padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 700, color: isFair ? '#111827' : '#fff', background: accentColor, whiteSpace: 'nowrap', marginBottom: '0.25rem', lineHeight: 1.4 }}>
+              {upside != null && (upside > 0 ? '+' : '')}{upside}%
+            </div>
+            <div style={{ width: '100%', height: '2px', background: `linear-gradient(90deg, var(--text-muted, #6b7280), ${accentColor})`, position: 'relative', borderRadius: '1px' }}>
+              <div style={{ position: 'absolute', left: '-2px', top: '-2px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--text-muted, #6b7280)' }} />
+              <div style={{ position: 'absolute', right: '-1px', top: '-3px', width: '0', height: '0', borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: `6px solid ${accentColor}` }} />
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', minWidth: '65px' }}>
+            <div className="vi-label" style={{ fontSize: '0.6rem', color: isLowConf ? 'rgba(245, 158, 11, 0.8)' : 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
+              {isLowConf ? 'Fair Value ~' : 'Fair Value'}
+            </div>
+            <div className="vi-value" style={{ fontSize: '1.05rem', fontWeight: 700, color: accentColor }}>{fv!.toFixed(2)}</div>
+            <div className="vi-currency" style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
+          </div>
+        </div>
+        <p className="valuation-seo-text" style={{ margin: '0.4rem 0 0 0', fontSize: '0.7rem', color: 'var(--text-secondary, #9ca3af)', lineHeight: 1.5, textAlign: 'center', maxWidth: '380px' }}>
+          {seoTextJsx}
+          {isLowConf && <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>Eingeschränkte Konfidenz — alle Modelle weichen stark vom Kurs ab.</span>}
+          {isExtremeDeviation && !isLowConf && <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>Hohe Abweichung vom Marktpreis — Datenqualität und Modelleignung prüfen.</span>}
+        </p>
+      </div>
+    );
+  })() : null;
+
   return (
     <>
       {/* SEO Meta Tags */}
@@ -439,30 +539,47 @@ export const StockDetailPage = () => {
         <div className="stock-page-header" style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '1.5rem',
+          gap: '1rem',
           marginBottom: '1rem',
-          flexWrap: 'wrap'
+          flexWrap: 'nowrap',
         }}>
-          <h1 style={{
-            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            margin: 0
+          {/* Company Name + Favorite Button inline */}
+          <div className="company-name-row" style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '0.75rem',
+            minWidth: 0,
+            flexShrink: 1,
           }}>
-            {companyName}
-          </h1>
+            <h1 style={{
+              fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              margin: 0,
+              whiteSpace: 'normal',
+              lineHeight: 1.2,
+              minWidth: 0,
+            }}>
+              {companyName}
+            </h1>
+            <div className="favorite-desktop" style={{ fontSize: '0.75rem', flexShrink: 0 }}>
+              <FavoriteButton ticker={ticker || ''} />
+            </div>
+          </div>
 
-          {/* Stock Info - Horizontal Compact Box */}
-          <div style={{
+          {/* Stock Info - Horizontal Compact */}
+          <div className="stock-info-box" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '2rem',
-            padding: '0.75rem 1.25rem',
+            gap: '1.5rem',
+            padding: '0.5rem 1rem',
             background: 'var(--surface)',
             borderRadius: '8px',
             border: '1px solid var(--border-color)',
             fontSize: '0.875rem',
-            flexWrap: 'wrap'
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Ticker:</span>
@@ -486,181 +603,25 @@ export const StockDetailPage = () => {
             )}
           </div>
 
-          {/* Valuation Indicator — Kurs → Fair Value with arrow and verdict */}
-          {currentPrice != null && (() => {
-            const hasFV = fairValueData?.explanation?.fairValueCombined != null;
-            const fv = hasFV ? fairValueData!.explanation.fairValueCombined! : null;
-            const verdict = fairValueData?.explanation?.valuationVerdict;
-            const upside = fairValueData?.explanation?.upsidePercent;
-            const isUnder = verdict?.includes('unter Fair Value');
-            const isOver = verdict?.includes('über Fair Value');
-            const isExtremeDeviation = verdict?.includes('Datenqualität prüfen');
-            const isFair = !isUnder && !isOver;
-            const accentColor = isExtremeDeviation ? '#f59e0b' : isUnder ? '#10b981' : isOver ? '#ef4444' : '#8b5cf6';
-            const accentRgb = isExtremeDeviation ? '245,158,11' : isUnder ? '16,185,129' : isOver ? '239,68,68' : '139,92,246';
-            const currSym = stockData.currency === 'USD' ? '$' : stockData.currency;
+          {/* Valuation Indicator — mobile: in header; desktop: in Fair Value tab */}
+          <div className="valuation-header-wrapper">
+            {valuationIndicatorJsx}
+          </div>
 
-            if (!hasFV) {
-              return (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.75rem 1.25rem',
-                  background: 'var(--surface)',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aktueller Kurs:</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.1rem' }}>
-                      {currentPrice.toFixed(2)} {currSym}
-                    </span>
-                  </div>
-                </div>
-              );
-            }
-
-            // Build natural-language SEO text
-            const absUpside = upside != null ? Math.abs(upside) : 0;
-            const fvFormatted = `${fv!.toFixed(2)} ${currSym}`;
-            const priceFormatted = `${currentPrice.toFixed(2)} ${currSym}`;
-            const isLowConf = fairValueData?.explanation?.lowConfidence;
-
-            let seoText = '';
-            if (isUnder && isExtremeDeviation) {
-              seoText = `${companyName} wird an der Börse deutlich unter dem berechneten Fair Value von ${fvFormatted} gehandelt. Beim aktuellen Kurs von ${priceFormatted} ergibt sich ein rechnerisches Kurspotential von ${absUpside}%.`;
-            } else if (isOver && isExtremeDeviation) {
-              seoText = `${companyName} wird an der Börse deutlich über dem berechneten Fair Value von ${fvFormatted} gehandelt. Beim aktuellen Kurs von ${priceFormatted} besteht ein rechnerisches Kursrückfallrisiko von ${absUpside}%.`;
-            } else if (isUnder) {
-              seoText = `${companyName} wird an der Börse unter Fair Value gehandelt. Beim aktuellen Kurs von ${priceFormatted} ergibt sich ein Kurspotential von ${absUpside}% zum berechneten Fair Value von ${fvFormatted}.`;
-            } else if (isOver) {
-              seoText = `${companyName} wird an der Börse über Fair Value gehandelt. Beim aktuellen Kurs von ${priceFormatted} besteht ein Kursrückfallrisiko von ${absUpside}% zum berechneten Fair Value von ${fvFormatted}.`;
-            } else {
-              seoText = `${companyName} wird an der Börse nahe dem berechneten Fair Value von ${fvFormatted} gehandelt. Der aktuelle Kurs von ${priceFormatted} weicht nur ${absUpside}% ab — die Aktie erscheint fair bewertet.`;
-            }
-
-            return (
-              <div className="valuation-indicator" style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '0.75rem 1.25rem',
-                background: `linear-gradient(135deg, rgba(${accentRgb}, 0.06), rgba(${accentRgb}, 0.02))`,
-                borderRadius: '12px',
-                border: `1px solid rgba(${accentRgb}, 0.2)`,
-                maxWidth: '600px',
-                width: '100%',
-              }}>
-                {/* Top row: Kurs → Arrow → Fair Value */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                  {/* Current Price */}
-                  <div style={{ textAlign: 'center', minWidth: '65px' }}>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
-                      Kurs
-                    </div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f3f4f6)' }}>
-                      {currentPrice.toFixed(2)}
-                    </div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
-                  </div>
-
-                  {/* Arrow connector with percentage */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    padding: '0 0.6rem',
-                    minWidth: '70px',
-                    flex: '0 1 auto',
-                  }}>
-                    {/* Percentage pill */}
-                    <div style={{
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '20px',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      color: isFair ? '#111827' : '#fff',
-                      background: accentColor,
-                      whiteSpace: 'nowrap',
-                      marginBottom: '0.25rem',
-                      lineHeight: 1.4,
-                    }}>
-                      {upside != null && (upside > 0 ? '+' : '')}{upside}%
-                    </div>
-
-                    {/* Gradient arrow line */}
-                    <div style={{
-                      width: '100%',
-                      height: '2px',
-                      background: `linear-gradient(90deg, var(--text-muted, #6b7280), ${accentColor})`,
-                      position: 'relative',
-                      borderRadius: '1px',
-                    }}>
-                      <div style={{
-                        position: 'absolute', left: '-2px', top: '-2px',
-                        width: '6px', height: '6px', borderRadius: '50%',
-                        background: 'var(--text-muted, #6b7280)',
-                      }} />
-                      <div style={{
-                        position: 'absolute', right: '-1px', top: '-3px',
-                        width: '0', height: '0',
-                        borderTop: '4px solid transparent',
-                        borderBottom: '4px solid transparent',
-                        borderLeft: `6px solid ${accentColor}`,
-                      }} />
-                    </div>
-                  </div>
-
-                  {/* Fair Value */}
-                  <div style={{ textAlign: 'center', minWidth: '65px' }}>
-                    <div style={{ fontSize: '0.6rem', color: isLowConf ? 'rgba(245, 158, 11, 0.8)' : 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
-                      {isLowConf ? 'Fair Value ~' : 'Fair Value'}
-                    </div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 700, color: accentColor }}>
-                      {fv!.toFixed(2)}
-                    </div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
-                  </div>
-                </div>
-
-                {/* Natural language SEO text below the graphic */}
-                <p style={{
-                  margin: '0.5rem 0 0 0',
-                  fontSize: '0.78rem',
-                  color: 'var(--text-secondary, #9ca3af)',
-                  lineHeight: 1.5,
-                  textAlign: 'center',
-                }}>
-                  {seoText}
-                  {isLowConf && (
-                    <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>
-                      Eingeschränkte Konfidenz — alle Modelle weichen erheblich vom Marktpreis ab.
-                    </span>
-                  )}
-                  {isExtremeDeviation && !isLowConf && (
-                    <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>
-                      Hohe Abweichung vom Marktpreis — Datenqualität und Modelleignung prüfen.
-                    </span>
-                  )}
-                </p>
-              </div>
-            );
-          })()}
-
-          {/* Favorite Button - small and subtle */}
-          <div style={{ marginLeft: 'auto' }}>
+          {/* Favorite Button - mobile only (desktop version is next to company name) */}
+          <div className="favorite-mobile" style={{ marginLeft: 'auto' }}>
             <FavoriteButton ticker={ticker || ''} />
           </div>
         </div>
 
-        {/* Main Content - Grid Layout: Chart left, News right (on desktop) */}
+        {/* Main Content - Grid Layout: Chart left, Tab Panel right (on desktop) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr',
           gap: '30px',
           marginTop: '20px'
         }} className="main-content-wrapper">
-          {/* Chart Section - Sticky on desktop */}
+          {/* Chart Section */}
           <div className="chart-section card">
             {/* Chart Header with Title and Time Range Selector */}
             <div style={{
@@ -790,7 +751,7 @@ export const StockDetailPage = () => {
               </span>
             </div>
 
-            {/* Fair Value Explanation - Below chart */}
+            {/* Fair Value Explanation - always below chart */}
             {fairValueData?.explanation && (
               <FairValueExplanation
                 explanation={fairValueData.explanation}
@@ -802,191 +763,259 @@ export const StockDetailPage = () => {
 
           </div>
 
-          {/* News Section - Scrollable on desktop */}
-          <div className="news-section card">
-            {/* Header with News Type Toggle and Add Button */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>
-                  News & Events
-                </h2>
-                <button
-                  onClick={() => setShowNewsOnChart(v => !v)}
-                  title={showNewsOnChart ? 'News im Chart ausblenden' : 'News im Chart einblenden'}
-                  style={{
-                    background: 'none',
-                    border: '1px solid var(--border-color, #374151)',
-                    borderRadius: '6px',
-                    padding: '0.3rem 0.5rem',
-                    cursor: 'pointer',
-                    color: showNewsOnChart ? 'var(--text-primary, #f3f4f6)' : 'var(--text-muted, #6b7280)',
-                    fontSize: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    opacity: showNewsOnChart ? 1 : 0.5,
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {showNewsOnChart ? (
-                      <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-4.879-4.879" />
-                    )}
-                  </svg>
-                  Chart
-                </button>
-              </div>
+          {/* Right Panel: Tab Panel with Fair Value and News (desktop) */}
+          <div className="right-panel card" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
-              {isAuthenticated && (
-                <button
-                  onClick={() => {
-                    setEditingNews(null);
-                    setIsAddModalOpen(true);
-                  }}
-                  className="btn-primary"
-                  style={{
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>+</span>
-                  News hinzufügen
-                </button>
+            {/* Tab Buttons - large modern segmented control */}
+            <div className="right-panel-tabs" style={{
+              display: 'flex',
+              background: 'var(--background)',
+              borderRadius: '12px',
+              padding: '5px',
+              marginBottom: '1.5rem',
+              gap: '5px',
+            }}>
+              <button
+                onClick={() => setActiveTab('fairvalue')}
+                style={{
+                  flex: 1,
+                  padding: '0.85rem 1rem',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  borderRadius: '9px',
+                  background: activeTab === 'fairvalue'
+                    ? 'linear-gradient(135deg, var(--primary-color), #7c3aed)'
+                    : 'transparent',
+                  color: activeTab === 'fairvalue' ? 'white' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  boxShadow: activeTab === 'fairvalue' ? '0 2px 12px rgba(139,92,246,0.35)' : 'none',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                Fair Value
+              </button>
+              <button
+                onClick={() => setActiveTab('news')}
+                style={{
+                  flex: 1,
+                  padding: '0.85rem 1rem',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  borderRadius: '9px',
+                  background: activeTab === 'news'
+                    ? 'linear-gradient(135deg, var(--primary-color), #7c3aed)'
+                    : 'transparent',
+                  color: activeTab === 'news' ? 'white' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  boxShadow: activeTab === 'news' ? '0 2px 12px rgba(139,92,246,0.35)' : 'none',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                News & Events
+              </button>
+            </div>
+
+            {/* Tab Content: Fair Value */}
+            <div className="tab-content-fairvalue" style={{ display: activeTab === 'fairvalue' ? 'block' : 'none' }}>
+              {valuationIndicatorJsx ?? (
+                <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '3rem 1rem' }}>
+                  Keine Fair Value Daten verfügbar
+                </div>
               )}
             </div>
 
-            {/* News Type Toggle - Only show if authenticated */}
-            {isAuthenticated && (
-              <div style={{
-                display: 'flex',
-                gap: '0.5rem',
-                marginBottom: '1.5rem',
-                background: 'var(--background)',
-                padding: '0.25rem',
-                borderRadius: '8px',
-                width: 'fit-content'
-              }}>
-                <button
-                  onClick={() => setNewsType('ai')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    border: 'none',
+            {/* Tab Content: News & Events */}
+            <div className="tab-content-news" style={{ display: activeTab === 'news' ? 'block' : 'none' }}>
+              <div className="news-section" style={{ flex: 1, overflowY: 'auto' }}>
+                {/* Header with News Type Toggle and Add Button */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                  gap: '1rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>
+                      News & Events
+                    </h2>
+                    <button
+                      onClick={() => setShowNewsOnChart(v => !v)}
+                      title={showNewsOnChart ? 'News im Chart ausblenden' : 'News im Chart einblenden'}
+                      style={{
+                        background: 'none',
+                        border: '1px solid var(--border-color, #374151)',
+                        borderRadius: '6px',
+                        padding: '0.3rem 0.5rem',
+                        cursor: 'pointer',
+                        color: showNewsOnChart ? 'var(--text-primary, #f3f4f6)' : 'var(--text-muted, #6b7280)',
+                        fontSize: '0.75rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        opacity: showNewsOnChart ? 1 : 0.5,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {showNewsOnChart ? (
+                          <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-4.879-4.879" />
+                        )}
+                      </svg>
+                      Chart
+                    </button>
+                  </div>
+
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => {
+                        setEditingNews(null);
+                        setIsAddModalOpen(true);
+                      }}
+                      className="btn-primary"
+                      style={{
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>+</span>
+                      News hinzufügen
+                    </button>
+                  )}
+                </div>
+
+                {/* News Type Toggle - Only show if authenticated */}
+                {isAuthenticated && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    marginBottom: '1.5rem',
+                    background: 'var(--background)',
+                    padding: '0.25rem',
+                    borderRadius: '8px',
+                    width: 'fit-content'
+                  }}>
+                    <button
+                      onClick={() => setNewsType('ai')}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        border: 'none',
+                        borderRadius: '6px',
+                        background: newsType === 'ai' ? 'var(--primary-color)' : 'transparent',
+                        color: newsType === 'ai' ? 'white' : 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (newsType !== 'ai') {
+                          e.currentTarget.style.background = 'var(--surface-light)';
+                          e.currentTarget.style.color = 'var(--text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (newsType !== 'ai') {
+                          e.currentTarget.style.background = 'transparent';
+                          e.currentTarget.style.color = 'var(--text-secondary)';
+                        }
+                      }}
+                    >
+                      🤖 AI News ({aiNewsData.length})
+                    </button>
+                    <button
+                      onClick={() => setNewsType('user')}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        border: 'none',
+                        borderRadius: '6px',
+                        background: newsType === 'user' ? 'var(--primary-color)' : 'transparent',
+                        color: newsType === 'user' ? 'white' : 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (newsType !== 'user') {
+                          e.currentTarget.style.background = 'var(--surface-light)';
+                          e.currentTarget.style.color = 'var(--text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (newsType !== 'user') {
+                          e.currentTarget.style.background = 'transparent';
+                          e.currentTarget.style.color = 'var(--text-secondary)';
+                        }
+                      }}
+                    >
+                      👤 Meine News ({userNewsData.length})
+                    </button>
+                  </div>
+                )}
+
+                {/* AI Disclaimer */}
+                {newsType === 'ai' && (
+                  <div style={{
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
                     borderRadius: '6px',
-                    background: newsType === 'ai' ? 'var(--primary-color)' : 'transparent',
-                    color: newsType === 'ai' ? 'white' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (newsType !== 'ai') {
-                      e.currentTarget.style.background = 'var(--surface-light)';
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (newsType !== 'ai') {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                    }
-                  }}
-                >
-                  🤖 AI News ({aiNewsData.length})
-                </button>
-                <button
-                  onClick={() => setNewsType('user')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    border: 'none',
-                    borderRadius: '6px',
-                    background: newsType === 'user' ? 'var(--primary-color)' : 'transparent',
-                    color: newsType === 'user' ? 'white' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (newsType !== 'user') {
-                      e.currentTarget.style.background = 'var(--surface-light)';
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (newsType !== 'user') {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                    }
-                  }}
-                >
-                  👤 Meine News ({userNewsData.length})
-                </button>
+                    padding: '0.5rem 0.75rem',
+                    marginBottom: '1rem',
+                    marginTop: '-1rem',
+                    fontSize: '0.8rem',
+                    color: 'var(--text-secondary)',
+                    display: 'inline-block'
+                  }}>
+                    ℹ️ AI-generiert, keine Anlageberatung
+                  </div>
+                )}
+
+                {/* News List */}
+                <NewsList
+                  news={newsData}
+                  onNewsClick={newsType === 'user' ? handleEditUserNews : handleNewsClick}
+                  onDelete={newsType === 'user' ? handleDeleteUserNews : undefined}
+                  canDelete={newsType === 'user'}
+                  highlightedId={highlightedNewsId}
+                />
+
+                {/* Disclaimer */}
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  marginTop: '20px',
+                  display: 'flex',
+                  gap: '10px',
+                  alignItems: 'start'
+                }}>
+                  <svg
+                    style={{ width: '16px', height: '16px', color: 'var(--danger-color)', flexShrink: 0, marginTop: '2px' }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                    <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.4', margin: 0 }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>Hinweis:</strong> Diese Informationen dienen ausschließlich zu Bildungszwecken und stellen keine Anlageberatung dar. Alle Investitionsentscheidungen erfolgen auf eigene Verantwortung.
+                  </p>
+                </div>
               </div>
-            )}
-
-            {/* AI Disclaimer */}
-            {newsType === 'ai' && (
-              <div style={{
-                background: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                borderRadius: '6px',
-                padding: '0.5rem 0.75rem',
-                marginBottom: '1rem',
-                marginTop: '-1rem',
-                fontSize: '0.8rem',
-                color: 'var(--text-secondary)',
-                display: 'inline-block'
-              }}>
-                ℹ️ AI-generiert, keine Anlageberatung
-              </div>
-            )}
-
-            {/* News List */}
-            <NewsList
-              news={newsData}
-              onNewsClick={newsType === 'user' ? handleEditUserNews : handleNewsClick}
-              onDelete={newsType === 'user' ? handleDeleteUserNews : undefined}
-              canDelete={newsType === 'user'}
-              highlightedId={highlightedNewsId}
-            />
-
-            {/* Disclaimer */}
-            <div style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              padding: '0.75rem 1rem',
-              marginTop: '20px',
-              display: 'flex',
-              gap: '10px',
-              alignItems: 'start'
-            }}>
-              <svg
-                style={{ width: '16px', height: '16px', color: 'var(--danger-color)', flexShrink: 0, marginTop: '2px' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-                <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.4', margin: 0 }}>
-                <strong style={{ color: 'var(--text-primary)' }}>Hinweis:</strong> Diese Informationen dienen ausschließlich zu Bildungszwecken und stellen keine Anlageberatung dar. Alle Investitionsentscheidungen erfolgen auf eigene Verantwortung.
-              </p>
             </div>
           </div>
         </div>
@@ -1080,8 +1109,59 @@ export const StockDetailPage = () => {
 
       {/* CSS for responsive grid + mobile optimization */}
       <style dangerouslySetInnerHTML={{ __html: `
+        /* Favorite button visibility: desktop inline, mobile absolute */
+        .favorite-mobile { display: none; }
+        .favorite-desktop { display: flex; align-items: center; }
+        .favorite-desktop .favorite-button {
+          font-size: 0.75rem !important;
+          padding: 0.3rem 0.6rem !important;
+          gap: 0.25rem !important;
+        }
+        .favorite-desktop .favorite-button svg {
+          width: 13px !important;
+          height: 13px !important;
+        }
+
+        /* Desktop: 2-column grid, column header, valuation in tab not header */
+        @media (min-width: 768px) {
+          .stock-detail-page .main-content-wrapper {
+            grid-template-columns: 1.15fr 1fr !important;
+            align-items: start;
+          }
+          .stock-detail-page .stock-page-header {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 0.4rem !important;
+          }
+          .stock-detail-page .valuation-header-wrapper {
+            display: none !important;
+          }
+          .stock-detail-page .right-panel {
+            position: sticky;
+            top: 80px;
+          }
+          /* Stock info: plain inline row, no box, same as mobile */
+          .stock-detail-page .stock-info-box {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            gap: 1.25rem !important;
+            justify-content: center !important;
+          }
+          .stock-detail-page .stock-info-box > div {
+            flex-direction: row !important;
+            gap: 0.3rem !important;
+            align-items: baseline !important;
+          }
+          .stock-detail-page .stock-info-box span {
+            font-size: 0.85rem !important;
+          }
+        }
+
         /* ===== MOBILE: Full-width charts, no padding ===== */
         @media (max-width: 767px) {
+          .favorite-desktop { display: none !important; }
+          .favorite-mobile { display: block !important; }
           .stock-detail-page {
             padding-left: 0 !important;
             padding-right: 0 !important;
@@ -1094,16 +1174,32 @@ export const StockDetailPage = () => {
             padding: 0 0.75rem;
             gap: 0.5rem;
             flex-direction: column !important;
+            flex-wrap: wrap !important;
             align-items: center !important;
             text-align: center;
             margin-bottom: 1.25rem !important;
           }
+          .stock-detail-page .valuation-indicator {
+            width: 100% !important;
+            flex-shrink: 1 !important;
+          }
+          .stock-detail-page .valuation-seo-text {
+            max-width: 100% !important;
+          }
 
           .stock-detail-page .stock-page-header h1 {
             font-size: 1.5rem !important;
-            width: 100%;
             text-align: center;
             margin-bottom: -0.7rem !important;
+          }
+          .stock-detail-page .company-name-row {
+            width: 100%;
+            justify-content: center !important;
+            align-items: center !important;
+            text-align: center !important;
+          }
+          .stock-detail-page .company-name-row h1 {
+            text-align: center !important;
           }
 
           /* Stock info box: single-line, compact, subtle, directly under name */
@@ -1131,8 +1227,8 @@ export const StockDetailPage = () => {
             justify-content: center !important;
           }
 
-          /* Favorite button: inline with company name as small star */
-          .stock-detail-page .stock-page-header > div:last-child {
+          /* Favorite button mobile: small star in top-right corner */
+          .stock-detail-page .stock-page-header .favorite-mobile {
             margin-left: 0 !important;
             position: absolute;
             right: 0.75rem;
@@ -1299,23 +1395,79 @@ export const StockDetailPage = () => {
           .stock-detail-page .card {
             padding: 1.5rem;
           }
+
+          /* Large, prominent valuation indicator in desktop tab panel */
+          .stock-detail-page .tab-content-fairvalue .valuation-indicator {
+            padding: 2rem 2rem 1.5rem !important;
+            border-radius: 16px !important;
+            border-width: 1.5px !important;
+            gap: 0.5rem;
+          }
+          .stock-detail-page .tab-content-fairvalue .vi-label {
+            font-size: 0.75rem !important;
+            letter-spacing: 0.1em !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .stock-detail-page .tab-content-fairvalue .vi-value {
+            font-size: 2.6rem !important;
+            line-height: 1 !important;
+            margin-bottom: 0.15rem !important;
+          }
+          .stock-detail-page .tab-content-fairvalue .vi-currency {
+            font-size: 1rem !important;
+            margin-top: 0.15rem !important;
+          }
+          .stock-detail-page .tab-content-fairvalue .vi-arrow-area {
+            padding: 0 1.5rem !important;
+            min-width: 100px !important;
+          }
+          .stock-detail-page .tab-content-fairvalue .vi-pill {
+            font-size: 1.15rem !important;
+            padding: 0.4rem 1.1rem !important;
+            margin-bottom: 0.6rem !important;
+            border-radius: 999px !important;
+          }
+          .stock-detail-page .tab-content-fairvalue .valuation-seo-text {
+            font-size: 0.9rem !important;
+            max-width: 100% !important;
+            margin-top: 1.25rem !important;
+            line-height: 1.6 !important;
+            text-align: center !important;
+          }
         }
 
         @media (min-width: 1200px) {
-          .main-content-wrapper {
-            grid-template-columns: 1fr clamp(450px, 35vw, 600px) !important;
-            align-items: start;
+          .stock-detail-page .main-content-wrapper {
+            grid-template-columns: 1.2fr 1fr !important;
           }
-
-          .news-section {
-            max-height: calc(100vh - 40px);
+          .stock-detail-page .news-section {
+            max-height: calc(100vh - 200px);
             overflow-y: auto;
           }
         }
 
         @media (min-width: 1400px) {
-          .main-content-wrapper {
-            grid-template-columns: 1fr clamp(420px, 30vw, 550px) !important;
+          .stock-detail-page .main-content-wrapper {
+            grid-template-columns: 1.3fr 1fr !important;
+          }
+        }
+
+        /* Mobile: hide tab buttons in right-panel, always show news content */
+        @media (max-width: 767px) {
+          .stock-detail-page .right-panel .right-panel-tabs {
+            display: none !important;
+          }
+          .stock-detail-page .right-panel .tab-content-fairvalue {
+            display: none !important;
+          }
+          .stock-detail-page .right-panel .tab-content-news {
+            display: block !important;
+          }
+          /* Valuation indicator: full width in mobile header */
+          .stock-detail-page .valuation-header-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
           }
         }
 
