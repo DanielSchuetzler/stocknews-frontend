@@ -12,6 +12,13 @@ export interface FairValueDataPoint {
   fairValueGraham: number | null;
   fairValueLynch: number | null;
   fairValueEarningsCap: number | null;
+  // Per-year exclusion flags (set by frontend correction logic)
+  dcfExcluded?: boolean;
+  grahamExcluded?: boolean;
+  lynchExcluded?: boolean;
+  earningsCapExcluded?: boolean;
+  lowConfidence?: boolean;
+  stockPriceAtDate?: number | null;  // Reference stock price used for exclusion check
 }
 
 // Detailed breakdown of the current fair value calculation
@@ -80,6 +87,9 @@ export interface FairValueExplanation {
   grahamExcluded: boolean;
   lynchExcluded: boolean;
   earningsCapExcluded: boolean;
+
+  // Low confidence flag (all models were extreme, used closest-to-price as fallback)
+  lowConfidence: boolean;
 }
 
 // Complete API response

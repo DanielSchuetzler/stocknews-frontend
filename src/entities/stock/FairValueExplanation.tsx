@@ -146,10 +146,11 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                   textAlign: 'center',
                   lineHeight: 1.4,
                 }}>
-                  {ex.valuationVerdict?.split(' – ').map((part, i) => (
-                    <span key={i}>{i > 0 && <br />}{part}</span>
-                  ))}
-                  <br />({ex.upsidePercent > 0 ? '+' : ''}{ex.upsidePercent}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''})
+                  {(() => {
+                    const mainVerdict = ex.valuationVerdict?.split(' – ')[0] || ex.valuationVerdict;
+                    const pctLabel = `(${ex.upsidePercent > 0 ? '+' : ''}${ex.upsidePercent}%${isUnder ? ' Potential' : isOver ? ' Risiko' : ''})`;
+                    return <>{mainVerdict}<br />{pctLabel}</>;
+                  })()}
                 </span>
               )}
             </div>
@@ -475,10 +476,10 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                 marginBottom: '1rem',
               }}>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>
-                    Berechneter Fair Value
+                  <div style={{ fontSize: '0.7rem', color: ex.lowConfidence ? 'rgba(245, 158, 11, 0.8)' : 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>
+                    {ex.lowConfidence ? 'Fair Value (eingeschränkte Konfidenz)' : 'Berechneter Fair Value'}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'rgba(139, 92, 246, 1)' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: ex.lowConfidence ? 'rgba(245, 158, 11, 0.9)' : 'rgba(139, 92, 246, 1)' }}>
                     {formatCurrency(ex.fairValueCombined, ex.currency)}
                   </div>
                 </div>
@@ -510,10 +511,11 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                       textAlign: 'center',
                       lineHeight: 1.4,
                     }}>
-                      {ex.valuationVerdict?.split(' – ').map((part, i) => (
-                        <span key={i}>{i > 0 && <br />}{part}</span>
-                      ))}
-                      <br />({ex.upsidePercent > 0 ? '+' : ''}{ex.upsidePercent}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''})
+                      {(() => {
+                        const mainVerdict = ex.valuationVerdict?.split(' – ')[0] || ex.valuationVerdict;
+                        const pctLabel = `(${ex.upsidePercent > 0 ? '+' : ''}${ex.upsidePercent}%${isUnder ? ' Potential' : isOver ? ' Risiko' : ''})`;
+                        return <>{mainVerdict}<br />{pctLabel}</>;
+                      })()}
                     </span>
                   </div>
                 )}
@@ -568,9 +570,18 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                 <br />
                 <span style={{ color: 'var(--text-muted, #6b7280)' }}>
                   = <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>{formatCurrency(ex.fairValueCombined, ex.currency)}</strong>
-                  {' '}— {ex.modelsUsed} von 4 Modellen anwendbar
-                  {(ex.dcfExcluded || ex.grahamExcluded || ex.lynchExcluded || ex.earningsCapExcluded) &&
-                    `, davon ${[ex.dcfExcluded, ex.grahamExcluded, ex.lynchExcluded, ex.earningsCapExcluded].filter(Boolean).length} ausgeschlossen`}
+                  {ex.lowConfidence ? (
+                    <span style={{ color: 'rgba(245, 158, 11, 0.9)' }}>
+                      {' '}— Eingeschränkte Konfidenz: Alle Modelle weichen erheblich vom Marktpreis ab.
+                      Als Näherung wird das marktnächste Modell herangezogen. Ergebnis mit Vorsicht interpretieren.
+                    </span>
+                  ) : (
+                    <>
+                      {' '}— {ex.modelsUsed} von 4 Modellen anwendbar
+                      {(ex.dcfExcluded || ex.grahamExcluded || ex.lynchExcluded || ex.earningsCapExcluded) &&
+                        `, davon ${[ex.dcfExcluded, ex.grahamExcluded, ex.lynchExcluded, ex.earningsCapExcluded].filter(Boolean).length} ausgeschlossen`}
+                    </>
+                  )}
                 </span>
               </div>
 
@@ -584,38 +595,55 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--border-color, #374151)' }}>
                         <th style={{ padding: '0.2rem 0', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>GJ</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.dcfExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.dcfExcluded ? <s>DCF</s> : 'DCF'}</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.grahamExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.grahamExcluded ? <s>Graham FV</s> : 'Graham FV'}</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.lynchExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.lynchExcluded ? <s>Lynch</s> : 'Lynch'}</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.earningsCapExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.earningsCapExcluded ? <s>Gewinnkap.</s> : 'Gewinnkap.'}</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>DCF</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Graham FV</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Lynch</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Gewinnkap.</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Kurs</th>
                         <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 700, color: 'rgba(139, 92, 246, 0.9)', fontSize: '0.7rem' }}>Ø Fair Value</th>
                       </tr>
                     </thead>
                     <tbody>
                       {dataPoints.filter(dp => dp.fairValueCombined != null).map(dp => {
-                        // Recalculate Ø Fair Value excluding excluded models
-                        const includedValues: number[] = [];
-                        if (!ex.dcfExcluded && dp.fairValueDcf != null) includedValues.push(dp.fairValueDcf);
-                        if (!ex.grahamExcluded && dp.fairValueGraham != null) includedValues.push(dp.fairValueGraham);
-                        if (!ex.lynchExcluded && dp.fairValueLynch != null) includedValues.push(dp.fairValueLynch);
-                        if (!ex.earningsCapExcluded && dp.fairValueEarningsCap != null) includedValues.push(dp.fairValueEarningsCap);
-                        // Fallback: if all excluded, use backend combined value
-                        const recalcCombined = includedValues.length > 0
-                          ? includedValues.reduce((a, b) => a + b, 0) / includedValues.length
-                          : dp.fairValueCombined;
+                        // Per-year exclusion flags (set by correctedFairValueDataPoints in StockDetailPage)
+                        const dExcl = dp.dcfExcluded ?? false;
+                        const gExcl = dp.grahamExcluded ?? false;
+                        const lExcl = dp.lynchExcluded ?? false;
+                        const eExcl = dp.earningsCapExcluded ?? false;
+                        // Use the already-corrected fairValueCombined from the data point
+                        const displayCombined = dp.fairValueCombined;
+
+                        const exclStyle = (excl: boolean) => ({
+                          padding: '0.15rem 0' as const,
+                          textAlign: 'right' as const,
+                          opacity: excl ? 0.4 : 1,
+                          textDecoration: excl ? 'line-through' : 'none',
+                          color: excl ? 'rgba(245, 158, 11, 0.6)' : undefined,
+                        });
+
                         return (
-                        <tr key={dp.date}>
-                          <td style={{ padding: '0.15rem 0', color: 'var(--text-muted, #6b7280)' }}>{dp.fiscalYear}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.dcfExcluded ? 0.4 : 1, textDecoration: ex.dcfExcluded ? 'line-through' : 'none' }}>{dp.fairValueDcf != null ? formatNumber(dp.fairValueDcf) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.grahamExcluded ? 0.4 : 1, textDecoration: ex.grahamExcluded ? 'line-through' : 'none' }}>{dp.fairValueGraham != null ? formatNumber(dp.fairValueGraham) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.lynchExcluded ? 0.4 : 1, textDecoration: ex.lynchExcluded ? 'line-through' : 'none' }}>{dp.fairValueLynch != null ? formatNumber(dp.fairValueLynch) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.earningsCapExcluded ? 0.4 : 1, textDecoration: ex.earningsCapExcluded ? 'line-through' : 'none' }}>{dp.fairValueEarningsCap != null ? formatNumber(dp.fairValueEarningsCap) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right', fontWeight: 600, color: 'rgba(139, 92, 246, 1)' }}>{formatCurrency(recalcCombined, ex.currency)}</td>
+                        <tr key={dp.date} title={dp.lowConfidence ? `Eingeschränkte Konfidenz (GJ ${dp.fiscalYear}): alle Modelle weichen >2× vom Kurs ab` : undefined}>
+                          <td style={{ padding: '0.15rem 0', color: 'var(--text-muted, #6b7280)' }}>
+                            {dp.fiscalYear}
+                            {dp.lowConfidence && <span style={{ color: '#f59e0b', marginLeft: '0.2rem' }} title="Eingeschränkte Konfidenz">⚠</span>}
+                          </td>
+                          <td style={exclStyle(dExcl)}>{dp.fairValueDcf != null ? formatNumber(dp.fairValueDcf) : '–'}</td>
+                          <td style={exclStyle(gExcl)}>{dp.fairValueGraham != null ? formatNumber(dp.fairValueGraham) : '–'}</td>
+                          <td style={exclStyle(lExcl)}>{dp.fairValueLynch != null ? formatNumber(dp.fairValueLynch) : '–'}</td>
+                          <td style={exclStyle(eExcl)}>{dp.fairValueEarningsCap != null ? formatNumber(dp.fairValueEarningsCap) : '–'}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', color: 'var(--text-muted, #6b7280)', fontSize: '0.72rem' }}>{dp.stockPriceAtDate != null ? formatNumber(dp.stockPriceAtDate) : '–'}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', fontWeight: 600, color: dp.lowConfidence ? '#f59e0b' : 'rgba(139, 92, 246, 1)' }}>
+                            {dp.lowConfidence ? '~' : ''}{formatCurrency(displayCombined, ex.currency)}
+                          </td>
                         </tr>
                         );
                       })}
                     </tbody>
                   </table>
+                  <div style={{ marginTop: '0.3rem', fontSize: '0.65rem', color: 'var(--text-muted, #6b7280)', lineHeight: 1.4 }}>
+                    <span style={{ opacity: 0.4, textDecoration: 'line-through', color: 'rgba(245, 158, 11, 0.6)' }}>Durchgestrichen</span> = Modell weicht &gt;2× vom Aktienkurs des Jahres ab und wird nicht in den Ø Fair Value einbezogen.
+                    {' '}<span style={{ color: '#f59e0b' }}>⚠</span> = Eingeschränkte Konfidenz (alle Modelle extrem, nur marktnächstes Modell verwendet).
+                  </div>
                 </div>
               )}
             </div>

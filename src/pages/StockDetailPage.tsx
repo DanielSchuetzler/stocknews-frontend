@@ -63,27 +63,92 @@ export const StockDetailPage = () => {
     ? filteredPrices[filteredPrices.length - 1].close
     : null;
 
-  // Recalculate fairValueCombined in dataPoints, excluding models marked as excluded.
-  // The backend calculates historical combined values without exclusion logic,
-  // so we need to recalculate here so the chart line matches the table.
+  // Per-year exclusion: For each fiscal year, find the closest stock price and
+  // exclude models that deviate >2x or <0.5x from that year's stock price.
+  // When ALL models are extreme for a year → use only the closest model (low confidence).
   const correctedFairValueDataPoints = useMemo(() => {
-    if (!fairValueData?.dataPoints || !fairValueData?.explanation) return fairValueData?.dataPoints;
-    const ex = fairValueData.explanation;
-    const hasExclusions = ex.dcfExcluded || ex.grahamExcluded || ex.lynchExcluded || ex.earningsCapExcluded;
-    if (!hasExclusions) return fairValueData.dataPoints;
+    if (!fairValueData?.dataPoints) return fairValueData?.dataPoints;
+    const prices = stockData?.prices;
+    if (!prices || prices.length === 0) return fairValueData.dataPoints;
+
+    // Helper: find closest stock price for a given date
+    const findClosestPrice = (dateStr: string): number | null => {
+      const target = new Date(dateStr).getTime();
+      let closest: number | null = null;
+      let minDist = Infinity;
+      for (const p of prices) {
+        const dist = Math.abs(new Date(p.date).getTime() - target);
+        if (dist < minDist) { minDist = dist; closest = p.close; }
+      }
+      return closest;
+    };
 
     return fairValueData.dataPoints.map(dp => {
-      const included: number[] = [];
-      if (!ex.dcfExcluded && dp.fairValueDcf != null) included.push(dp.fairValueDcf);
-      if (!ex.grahamExcluded && dp.fairValueGraham != null) included.push(dp.fairValueGraham);
-      if (!ex.lynchExcluded && dp.fairValueLynch != null) included.push(dp.fairValueLynch);
-      if (!ex.earningsCapExcluded && dp.fairValueEarningsCap != null) included.push(dp.fairValueEarningsCap);
+      const price = findClosestPrice(dp.date);
+      if (price == null || price <= 0) return dp;
+
+      const upperBound = price * 2;
+      const lowerBound = price * 0.5;
+
+      // Collect available models with their values
+      const models: { key: 'dcf' | 'graham' | 'lynch' | 'earningsCap'; value: number }[] = [];
+      if (dp.fairValueDcf != null) models.push({ key: 'dcf', value: dp.fairValueDcf });
+      if (dp.fairValueGraham != null) models.push({ key: 'graham', value: dp.fairValueGraham });
+      if (dp.fairValueLynch != null) models.push({ key: 'lynch', value: dp.fairValueLynch });
+      if (dp.fairValueEarningsCap != null) models.push({ key: 'earningsCap', value: dp.fairValueEarningsCap });
+
+      if (models.length === 0) return dp;
+
+      // Check which models are extreme
+      const excluded: Record<string, boolean> = { dcf: false, graham: false, lynch: false, earningsCap: false };
+      let extremeCount = 0;
+      for (const m of models) {
+        if (m.value > upperBound || m.value < lowerBound) {
+          excluded[m.key] = true;
+          extremeCount++;
+        }
+      }
+
+      let lowConfidence = false;
+
+      if (extremeCount === 0) {
+        // No exclusions needed for this year
+        return { ...dp, dcfExcluded: false, grahamExcluded: false, lynchExcluded: false, earningsCapExcluded: false, lowConfidence: false, stockPriceAtDate: price };
+      }
+
+      if (extremeCount === models.length) {
+        // ALL models extreme → use only closest to price (low confidence)
+        lowConfidence = true;
+        let closestModel = models[0];
+        let minDist = Math.abs(models[0].value - price);
+        for (let i = 1; i < models.length; i++) {
+          const dist = Math.abs(models[i].value - price);
+          if (dist < minDist) { minDist = dist; closestModel = models[i]; }
+        }
+        // Exclude all except closest
+        for (const m of models) {
+          excluded[m.key] = m.key !== closestModel.key;
+        }
+      }
+
+      // Recalculate combined from non-excluded models
+      const included = models.filter(m => !excluded[m.key]).map(m => m.value);
       const newCombined = included.length > 0
         ? Math.round(included.reduce((a, b) => a + b, 0) / included.length * 100) / 100
         : dp.fairValueCombined;
-      return { ...dp, fairValueCombined: newCombined };
+
+      return {
+        ...dp,
+        fairValueCombined: newCombined,
+        dcfExcluded: excluded.dcf,
+        grahamExcluded: excluded.graham,
+        lynchExcluded: excluded.lynch,
+        earningsCapExcluded: excluded.earningsCap,
+        lowConfidence,
+        stockPriceAtDate: price,
+      };
     });
-  }, [fairValueData]);
+  }, [fairValueData, stockData?.prices]);
 
   // Scroll to news when clicked - scroll page to H1, scroll news item within news box
   const handleNewsClick = useCallback((newsId: number) => {
@@ -455,102 +520,129 @@ export const StockDetailPage = () => {
               );
             }
 
+            // Build natural-language SEO text
+            const absUpside = upside != null ? Math.abs(upside) : 0;
+            const fvFormatted = `${fv!.toFixed(2)} ${currSym}`;
+            const priceFormatted = `${currentPrice.toFixed(2)} ${currSym}`;
+            const isLowConf = fairValueData?.explanation?.lowConfidence;
+
+            let seoText = '';
+            if (isUnder && isExtremeDeviation) {
+              seoText = `${companyName} wird an der Börse deutlich unter dem berechneten Fair Value von ${fvFormatted} gehandelt. Beim aktuellen Kurs von ${priceFormatted} ergibt sich ein rechnerisches Kurspotential von ${absUpside}%.`;
+            } else if (isOver && isExtremeDeviation) {
+              seoText = `${companyName} wird an der Börse deutlich über dem berechneten Fair Value von ${fvFormatted} gehandelt. Beim aktuellen Kurs von ${priceFormatted} besteht ein rechnerisches Kursrückfallrisiko von ${absUpside}%.`;
+            } else if (isUnder) {
+              seoText = `${companyName} wird an der Börse unter Fair Value gehandelt. Beim aktuellen Kurs von ${priceFormatted} ergibt sich ein Kurspotential von ${absUpside}% zum berechneten Fair Value von ${fvFormatted}.`;
+            } else if (isOver) {
+              seoText = `${companyName} wird an der Börse über Fair Value gehandelt. Beim aktuellen Kurs von ${priceFormatted} besteht ein Kursrückfallrisiko von ${absUpside}% zum berechneten Fair Value von ${fvFormatted}.`;
+            } else {
+              seoText = `${companyName} wird an der Börse nahe dem berechneten Fair Value von ${fvFormatted} gehandelt. Der aktuelle Kurs von ${priceFormatted} weicht nur ${absUpside}% ab — die Aktie erscheint fair bewertet.`;
+            }
+
             return (
               <div className="valuation-indicator" style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0',
-                padding: '0.5rem 1rem',
+                padding: '0.75rem 1.25rem',
                 background: `linear-gradient(135deg, rgba(${accentRgb}, 0.06), rgba(${accentRgb}, 0.02))`,
-                borderRadius: '10px',
+                borderRadius: '12px',
                 border: `1px solid rgba(${accentRgb}, 0.2)`,
+                maxWidth: '600px',
+                width: '100%',
               }}>
-                {/* Current Price */}
-                <div style={{ textAlign: 'center', minWidth: '65px' }}>
-                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
-                    Kurs
+                {/* Top row: Kurs → Arrow → Fair Value */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                  {/* Current Price */}
+                  <div style={{ textAlign: 'center', minWidth: '65px' }}>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
+                      Kurs
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f3f4f6)' }}>
+                      {currentPrice.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
                   </div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary, #f3f4f6)' }}>
-                    {currentPrice.toFixed(2)}
+
+                  {/* Arrow connector with percentage */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '0 0.6rem',
+                    minWidth: '70px',
+                    flex: '0 1 auto',
+                  }}>
+                    {/* Percentage pill */}
+                    <div style={{
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '20px',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      color: isFair ? '#111827' : '#fff',
+                      background: accentColor,
+                      whiteSpace: 'nowrap',
+                      marginBottom: '0.25rem',
+                      lineHeight: 1.4,
+                    }}>
+                      {upside != null && (upside > 0 ? '+' : '')}{upside}%
+                    </div>
+
+                    {/* Gradient arrow line */}
+                    <div style={{
+                      width: '100%',
+                      height: '2px',
+                      background: `linear-gradient(90deg, var(--text-muted, #6b7280), ${accentColor})`,
+                      position: 'relative',
+                      borderRadius: '1px',
+                    }}>
+                      <div style={{
+                        position: 'absolute', left: '-2px', top: '-2px',
+                        width: '6px', height: '6px', borderRadius: '50%',
+                        background: 'var(--text-muted, #6b7280)',
+                      }} />
+                      <div style={{
+                        position: 'absolute', right: '-1px', top: '-3px',
+                        width: '0', height: '0',
+                        borderTop: '4px solid transparent',
+                        borderBottom: '4px solid transparent',
+                        borderLeft: `6px solid ${accentColor}`,
+                      }} />
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
+
+                  {/* Fair Value */}
+                  <div style={{ textAlign: 'center', minWidth: '65px' }}>
+                    <div style={{ fontSize: '0.6rem', color: isLowConf ? 'rgba(245, 158, 11, 0.8)' : 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
+                      {isLowConf ? 'Fair Value ~' : 'Fair Value'}
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 700, color: accentColor }}>
+                      {fv!.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
+                  </div>
                 </div>
 
-                {/* Arrow connector with percentage */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: '0 0.6rem',
-                  minWidth: '90px',
-                  flex: '0 1 auto',
+                {/* Natural language SEO text below the graphic */}
+                <p style={{
+                  margin: '0.5rem 0 0 0',
+                  fontSize: '0.78rem',
+                  color: 'var(--text-secondary, #9ca3af)',
+                  lineHeight: 1.5,
+                  textAlign: 'center',
                 }}>
-                  {/* Percentage pill */}
-                  <div style={{
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '20px',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    color: isFair ? '#111827' : '#fff',
-                    background: accentColor,
-                    whiteSpace: 'nowrap',
-                    marginBottom: '0.25rem',
-                    lineHeight: 1.4,
-                  }}>
-                    {upside != null && (upside > 0 ? '+' : '')}{upside}%{isUnder ? ' Potential' : isOver ? ' Risiko' : ''}
-                  </div>
-
-                  {/* Gradient arrow line */}
-                  <div style={{
-                    width: '100%',
-                    height: '2px',
-                    background: `linear-gradient(90deg, var(--text-muted, #6b7280), ${accentColor})`,
-                    position: 'relative',
-                    borderRadius: '1px',
-                    marginBottom: '0.25rem',
-                  }}>
-                    {/* Left dot */}
-                    <div style={{
-                      position: 'absolute', left: '-2px', top: '-2px',
-                      width: '6px', height: '6px', borderRadius: '50%',
-                      background: 'var(--text-muted, #6b7280)',
-                    }} />
-                    {/* Right arrow head */}
-                    <div style={{
-                      position: 'absolute', right: '-1px', top: '-3px',
-                      width: '0', height: '0',
-                      borderTop: '4px solid transparent',
-                      borderBottom: '4px solid transparent',
-                      borderLeft: `6px solid ${accentColor}`,
-                    }} />
-                  </div>
-
-                  {/* Verdict label */}
-                  <div style={{
-                    fontSize: '0.7rem',
-                    color: accentColor,
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    textAlign: 'center',
-                    lineHeight: 1.3,
-                  }}>
-                    {verdict?.split(' – ').map((part: string, i: number) => (
-                      <span key={i}>{i > 0 && <br />}{part}</span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Fair Value */}
-                <div style={{ textAlign: 'center', minWidth: '65px' }}>
-                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.1rem' }}>
-                    Fair Value
-                  </div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: accentColor }}>
-                    {fv!.toFixed(2)}
-                  </div>
-                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted, #6b7280)' }}>{currSym}</div>
-                </div>
+                  {seoText}
+                  {isLowConf && (
+                    <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>
+                      Eingeschränkte Konfidenz — alle Modelle weichen erheblich vom Marktpreis ab.
+                    </span>
+                  )}
+                  {isExtremeDeviation && !isLowConf && (
+                    <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>
+                      Hohe Abweichung vom Marktpreis — Datenqualität und Modelleignung prüfen.
+                    </span>
+                  )}
+                </p>
               </div>
             );
           })()}
