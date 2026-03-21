@@ -174,7 +174,7 @@ export const StockChart: React.FC<StockChartProps> = ({
   const chartData = useMemo(() => {
     const datasets: any[] = [
       {
-        label: 'Schlusskurs',
+        label: 'Aktienkurs',
         data: prices.map((p) => p.close),
         borderColor: 'rgba(59, 130, 246, 1)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -219,7 +219,7 @@ export const StockChart: React.FC<StockChartProps> = ({
       ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       if (relevantFv.length > 0) {
-        // Build the chart points from relevant fair value data
+        // Build all fair value points
         const fairValuePoints = relevantFv.map((fv) => ({
           x: fv.date,
           y: fv.fairValueCombined as number,
@@ -228,10 +228,8 @@ export const StockChart: React.FC<StockChartProps> = ({
         }));
 
         // Extend backward: add a point at the first stock price date
-        // using the earliest available fair value (flat extrapolation)
         const firstFvDate = new Date(fairValuePoints[0].x);
         if (firstFvDate > firstPriceDate) {
-          // Use the closest point before range if available, otherwise use first in-range value
           const backValue = fvBeforeRange.length > 0
             ? fvBeforeRange[0].fairValueCombined as number
             : fairValuePoints[0].y;
@@ -247,7 +245,6 @@ export const StockChart: React.FC<StockChartProps> = ({
         }
 
         // Extend forward: add a point at the last stock price date
-        // using the latest fair value (flat extrapolation to today)
         const lastFvDate = new Date(fairValuePoints[fairValuePoints.length - 1].x);
         if (lastFvDate < lastPriceDate) {
           fairValuePoints.push({
@@ -267,13 +264,13 @@ export const StockChart: React.FC<StockChartProps> = ({
           borderDash: [8, 4],                              // Dashed line
           fill: false,
           tension: 0.3,                                    // Slight curve between annual points
-          pointRadius: fairValuePoints.map((p) => p.isExtension ? 0 : 6),
-          pointHoverRadius: fairValuePoints.map((p) => p.isExtension ? 4 : 8),
+          pointRadius: fairValuePoints.map((p) => p.isExtension || p.y == null ? 0 : 6),
+          pointHoverRadius: fairValuePoints.map((p) => p.isExtension || p.y == null ? 0 : 8),
           pointBackgroundColor: 'rgba(139, 92, 246, 1)',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointStyle: 'rectRot',                           // Diamond markers
-          spanGaps: true,
+          spanGaps: true,                                  // Connect across skipped extreme points
         });
       }
     }
@@ -297,7 +294,7 @@ export const StockChart: React.FC<StockChartProps> = ({
         display: true,
         position: 'top',
         labels: {
-          color: '#1f2937',
+          color: '#f3f4f6',
           font: { size: 14 },
         },
       },

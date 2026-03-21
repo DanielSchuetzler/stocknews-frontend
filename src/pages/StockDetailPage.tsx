@@ -3,7 +3,7 @@
  * EXACT design from original frontend with dark theme
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useStockData, useFilteredPrices, useFairValue } from '@/entities/stock/queries';
@@ -62,6 +62,28 @@ export const StockDetailPage = () => {
   const currentPrice = filteredPrices && filteredPrices.length > 0
     ? filteredPrices[filteredPrices.length - 1].close
     : null;
+
+  // Recalculate fairValueCombined in dataPoints, excluding models marked as excluded.
+  // The backend calculates historical combined values without exclusion logic,
+  // so we need to recalculate here so the chart line matches the table.
+  const correctedFairValueDataPoints = useMemo(() => {
+    if (!fairValueData?.dataPoints || !fairValueData?.explanation) return fairValueData?.dataPoints;
+    const ex = fairValueData.explanation;
+    const hasExclusions = ex.dcfExcluded || ex.grahamExcluded || ex.lynchExcluded || ex.earningsCapExcluded;
+    if (!hasExclusions) return fairValueData.dataPoints;
+
+    return fairValueData.dataPoints.map(dp => {
+      const included: number[] = [];
+      if (!ex.dcfExcluded && dp.fairValueDcf != null) included.push(dp.fairValueDcf);
+      if (!ex.grahamExcluded && dp.fairValueGraham != null) included.push(dp.fairValueGraham);
+      if (!ex.lynchExcluded && dp.fairValueLynch != null) included.push(dp.fairValueLynch);
+      if (!ex.earningsCapExcluded && dp.fairValueEarningsCap != null) included.push(dp.fairValueEarningsCap);
+      const newCombined = included.length > 0
+        ? Math.round(included.reduce((a, b) => a + b, 0) / included.length * 100) / 100
+        : dp.fairValueCombined;
+      return { ...dp, fairValueCombined: newCombined };
+    });
+  }, [fairValueData]);
 
   // Scroll to news when clicked - scroll page to H1, scroll news item within news box
   const handleNewsClick = useCallback((newsId: number) => {
@@ -634,7 +656,7 @@ export const StockDetailPage = () => {
                 currency={stockData.currency}
                 onNewsClick={handleNewsClick}
                 highlightedNewsId={highlightedNewsId}
-                fairValueData={fairValueData?.dataPoints}
+                fairValueData={correctedFairValueDataPoints}
                 showNews={showNewsOnChart}
                 showFairValue={showFairValueOnChart}
               />
@@ -680,7 +702,7 @@ export const StockDetailPage = () => {
             {fairValueData?.explanation && (
               <FairValueExplanation
                 explanation={fairValueData.explanation}
-                dataPoints={fairValueData.dataPoints}
+                dataPoints={correctedFairValueDataPoints || fairValueData.dataPoints}
                 showOnChart={showFairValueOnChart}
                 onToggleChart={() => setShowFairValueOnChart(v => !v)}
               />

@@ -74,6 +74,12 @@ export interface FairValueExplanation {
   weightLynch: number | null;
   weightEarningsCap: number | null;
   modelsUsed: number;
+
+  // Exclusion flags (model value >2x or <0.5x of current price)
+  dcfExcluded: boolean;
+  grahamExcluded: boolean;
+  lynchExcluded: boolean;
+  earningsCapExcluded: boolean;
 }
 
 // Complete API response

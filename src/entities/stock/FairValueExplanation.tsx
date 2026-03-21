@@ -221,6 +221,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               result={ex.fairValueDcf}
               currency={ex.currency}
               applicable={ex.dcfApplicable}
+              excluded={ex.dcfExcluded}
               note={ex.dcfNote}
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
@@ -274,6 +275,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               result={ex.fairValueGraham}
               currency={ex.currency}
               applicable={ex.grahamApplicable}
+              excluded={ex.grahamExcluded}
               note={ex.grahamNote}
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
@@ -328,6 +330,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               result={ex.fairValueLynch}
               currency={ex.currency}
               applicable={ex.lynchApplicable}
+              excluded={ex.lynchExcluded}
               note={ex.lynchNote}
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
@@ -389,6 +392,7 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               currency={ex.currency}
               applicable={ex.earningsCapApplicable}
               note={ex.earningsCapNote}
+              excluded={ex.earningsCapExcluded}
             >
               <p style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0.5rem 0' }}>
                 Gordon-Growth-Modell: Bewertet eine Aktie anhand der nachhaltigen Gewinnwachstumsrate
@@ -526,24 +530,47 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
               }}>
                 <strong style={{ color: 'var(--text-primary, #f3f4f6)' }}>Gewichtung:</strong>{' '}
 
-                {/* Build a readable formula */}
+                {/* Build a readable formula — excluded models shown struck-through */}
                 {(() => {
-                  const parts: string[] = [];
-                  if (ex.weightDcf != null && ex.weightDcf > 0 && ex.fairValueDcf != null)
+                  const parts: React.ReactNode[] = [];
+                  const excludedParts: string[] = [];
+
+                  if (ex.weightDcf != null && ex.weightDcf > 0 && ex.fairValueDcf != null && !ex.dcfExcluded)
                     parts.push(`DCF (${formatCurrency(ex.fairValueDcf, ex.currency)}) × ${Math.round(ex.weightDcf * 100)}%`);
-                  if (ex.weightGraham != null && ex.weightGraham > 0 && ex.fairValueGraham != null)
+                  if (ex.weightGraham != null && ex.weightGraham > 0 && ex.fairValueGraham != null && !ex.grahamExcluded)
                     parts.push(`Graham FV (${formatCurrency(ex.fairValueGraham, ex.currency)}) × ${Math.round(ex.weightGraham * 100)}%`);
-                  if (ex.weightLynch != null && ex.weightLynch > 0 && ex.fairValueLynch != null)
+                  if (ex.weightLynch != null && ex.weightLynch > 0 && ex.fairValueLynch != null && !ex.lynchExcluded)
                     parts.push(`Lynch (${formatCurrency(ex.fairValueLynch, ex.currency)}) × ${Math.round(ex.weightLynch * 100)}%`);
-                  if (ex.weightEarningsCap != null && ex.weightEarningsCap > 0 && ex.fairValueEarningsCap != null)
+                  if (ex.weightEarningsCap != null && ex.weightEarningsCap > 0 && ex.fairValueEarningsCap != null && !ex.earningsCapExcluded)
                     parts.push(`Gewinnkap. (${formatCurrency(ex.fairValueEarningsCap, ex.currency)}) × ${Math.round(ex.weightEarningsCap * 100)}%`);
-                  return parts.join(' + ');
+
+                  // Collect excluded models for display
+                  if (ex.dcfExcluded && ex.fairValueDcf != null) excludedParts.push(`DCF (${formatCurrency(ex.fairValueDcf, ex.currency)})`);
+                  if (ex.grahamExcluded && ex.fairValueGraham != null) excludedParts.push(`Graham FV (${formatCurrency(ex.fairValueGraham, ex.currency)})`);
+                  if (ex.lynchExcluded && ex.fairValueLynch != null) excludedParts.push(`Lynch (${formatCurrency(ex.fairValueLynch, ex.currency)})`);
+                  if (ex.earningsCapExcluded && ex.fairValueEarningsCap != null) excludedParts.push(`Gewinnkap. (${formatCurrency(ex.fairValueEarningsCap, ex.currency)})`);
+
+                  return (
+                    <>
+                      {(parts as string[]).join(' + ')}
+                      {excludedParts.length > 0 && (
+                        <>
+                          <br />
+                          <span style={{ color: 'rgba(245, 158, 11, 0.7)', fontSize: '0.8rem' }}>
+                            Ausgeschlossen (Abweichung &gt;2× vom Aktienkurs): {excludedParts.join(', ')}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  );
                 })()}
 
                 <br />
                 <span style={{ color: 'var(--text-muted, #6b7280)' }}>
                   = <strong style={{ color: 'rgba(139, 92, 246, 1)' }}>{formatCurrency(ex.fairValueCombined, ex.currency)}</strong>
                   {' '}— {ex.modelsUsed} von 4 Modellen anwendbar
+                  {(ex.dcfExcluded || ex.grahamExcluded || ex.lynchExcluded || ex.earningsCapExcluded) &&
+                    `, davon ${[ex.dcfExcluded, ex.grahamExcluded, ex.lynchExcluded, ex.earningsCapExcluded].filter(Boolean).length} ausgeschlossen`}
                 </span>
               </div>
 
@@ -557,24 +584,36 @@ export const FairValueExplanation: React.FC<FairValueExplanationProps> = ({ expl
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--border-color, #374151)' }}>
                         <th style={{ padding: '0.2rem 0', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>GJ</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>DCF</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Graham FV</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Lynch</th>
-                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>Gewinnkap.</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.dcfExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.dcfExcluded ? <s>DCF</s> : 'DCF'}</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.grahamExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.grahamExcluded ? <s>Graham FV</s> : 'Graham FV'}</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.lynchExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.lynchExcluded ? <s>Lynch</s> : 'Lynch'}</th>
+                        <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 600, color: ex.earningsCapExcluded ? 'rgba(245, 158, 11, 0.5)' : 'var(--text-muted, #6b7280)', fontSize: '0.7rem' }}>{ex.earningsCapExcluded ? <s>Gewinnkap.</s> : 'Gewinnkap.'}</th>
                         <th style={{ padding: '0.2rem 0', textAlign: 'right', fontWeight: 700, color: 'rgba(139, 92, 246, 0.9)', fontSize: '0.7rem' }}>Ø Fair Value</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {dataPoints.filter(dp => dp.fairValueCombined != null).map(dp => (
+                      {dataPoints.filter(dp => dp.fairValueCombined != null).map(dp => {
+                        // Recalculate Ø Fair Value excluding excluded models
+                        const includedValues: number[] = [];
+                        if (!ex.dcfExcluded && dp.fairValueDcf != null) includedValues.push(dp.fairValueDcf);
+                        if (!ex.grahamExcluded && dp.fairValueGraham != null) includedValues.push(dp.fairValueGraham);
+                        if (!ex.lynchExcluded && dp.fairValueLynch != null) includedValues.push(dp.fairValueLynch);
+                        if (!ex.earningsCapExcluded && dp.fairValueEarningsCap != null) includedValues.push(dp.fairValueEarningsCap);
+                        // Fallback: if all excluded, use backend combined value
+                        const recalcCombined = includedValues.length > 0
+                          ? includedValues.reduce((a, b) => a + b, 0) / includedValues.length
+                          : dp.fairValueCombined;
+                        return (
                         <tr key={dp.date}>
                           <td style={{ padding: '0.15rem 0', color: 'var(--text-muted, #6b7280)' }}>{dp.fiscalYear}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right' }}>{dp.fairValueDcf != null ? formatNumber(dp.fairValueDcf) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right' }}>{dp.fairValueGraham != null ? formatNumber(dp.fairValueGraham) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right' }}>{dp.fairValueLynch != null ? formatNumber(dp.fairValueLynch) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right' }}>{dp.fairValueEarningsCap != null ? formatNumber(dp.fairValueEarningsCap) : '–'}</td>
-                          <td style={{ padding: '0.15rem 0', textAlign: 'right', fontWeight: 600, color: 'rgba(139, 92, 246, 1)' }}>{formatCurrency(dp.fairValueCombined, ex.currency)}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.dcfExcluded ? 0.4 : 1, textDecoration: ex.dcfExcluded ? 'line-through' : 'none' }}>{dp.fairValueDcf != null ? formatNumber(dp.fairValueDcf) : '–'}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.grahamExcluded ? 0.4 : 1, textDecoration: ex.grahamExcluded ? 'line-through' : 'none' }}>{dp.fairValueGraham != null ? formatNumber(dp.fairValueGraham) : '–'}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.lynchExcluded ? 0.4 : 1, textDecoration: ex.lynchExcluded ? 'line-through' : 'none' }}>{dp.fairValueLynch != null ? formatNumber(dp.fairValueLynch) : '–'}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', opacity: ex.earningsCapExcluded ? 0.4 : 1, textDecoration: ex.earningsCapExcluded ? 'line-through' : 'none' }}>{dp.fairValueEarningsCap != null ? formatNumber(dp.fairValueEarningsCap) : '–'}</td>
+                          <td style={{ padding: '0.15rem 0', textAlign: 'right', fontWeight: 600, color: 'rgba(139, 92, 246, 1)' }}>{formatCurrency(recalcCombined, ex.currency)}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -746,28 +785,32 @@ const ModelCard: React.FC<{
   result: number | null;
   currency: string;
   applicable: boolean;
+  excluded?: boolean;
   note: string;
   children: React.ReactNode;
-}> = ({ title, weight, result, currency, applicable, note, children }) => (
+}> = ({ title, weight, result, currency, applicable, excluded = false, note, children }) => (
   <div style={{
     padding: '1rem',
     background: 'var(--background, #111827)',
     borderRadius: '6px',
-    border: applicable
-      ? '1px solid rgba(139, 92, 246, 0.3)'
-      : '1px solid var(--border-color, #374151)',
-    opacity: applicable ? 1 : 0.7,
+    border: excluded
+      ? '1px solid rgba(245, 158, 11, 0.3)'
+      : applicable
+        ? '1px solid rgba(139, 92, 246, 0.3)'
+        : '1px solid var(--border-color, #374151)',
+    opacity: applicable && !excluded ? 1 : 0.5,
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
       <h5 style={{
         margin: 0,
         fontSize: '0.95rem',
         fontWeight: 700,
-        color: applicable ? 'rgba(139, 92, 246, 1)' : 'var(--text-secondary, #9ca3af)',
+        color: excluded ? '#f59e0b' : applicable ? 'rgba(139, 92, 246, 1)' : 'var(--text-secondary, #9ca3af)',
       }}>
         {title}
+        {excluded && <span style={{ fontSize: '0.7rem', fontWeight: 400, marginLeft: '0.5rem' }}>(ausgeschlossen)</span>}
       </h5>
-      {applicable && weight != null && weight > 0 && (
+      {applicable && !excluded && weight != null && weight > 0 && (
         <span style={{
           fontSize: '0.75rem',
           padding: '0.15rem 0.5rem',
