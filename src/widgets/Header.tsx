@@ -163,7 +163,7 @@ export const Header = () => {
           </svg>
 
           {/* Brand Name */}
-          <span style={{
+          <span className="brand-name" style={{
             fontSize: '1.5rem',
             fontWeight: 700,
             background: 'var(--gradient-primary)',
@@ -175,11 +175,10 @@ export const Header = () => {
           </span>
         </Link>
 
-        {/* Search Bar - Desktop only */}
+        {/* Search Bar - inline on mobile, also on desktop */}
         <div className="desktop-search" style={{
           flex: '1',
           maxWidth: '500px',
-          display: 'none'
         }}>
           <CompanyAutocomplete placeholder="Suche nach Aktien..." />
         </div>
@@ -259,11 +258,8 @@ export const Header = () => {
         </nav>
       </div>
 
-      {/* Search Bar - Mobile only, always visible below header bar */}
-      <div className="mobile-search" style={{
-        display: 'block',
-        padding: '0 var(--spacing-md) 0.75rem'
-      }}>
+      {/* Search Bar - Mobile only fallback row (hidden, search now inline above) */}
+      <div className="mobile-search" style={{ display: 'none' }}>
         <CompanyAutocomplete placeholder="Suche nach Aktien..." />
       </div>
 
@@ -402,7 +398,7 @@ export const Header = () => {
 
       {/* Responsive CSS */}
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Mobile: show burger + mobile search, hide desktop nav + desktop search */
+        /* Mobile: search inline in header bar, no separate search row */
         .burger-btn {
           display: flex !important;
         }
@@ -410,19 +406,46 @@ export const Header = () => {
           display: none !important;
         }
         .desktop-search {
-          display: none !important;
-        }
-        .mobile-search {
           display: block !important;
         }
-        .mobile-search .company-search-input {
-          padding: 0.5rem 0.75rem !important;
-          padding-right: 2.25rem !important;
-          font-size: 0.875rem !important;
-          border-width: 1.5px !important;
+        .mobile-search {
+          display: none !important;
         }
 
-        /* Desktop: hide burger + mobile menu + mobile search, show desktop nav + search */
+        /* Mobile: compact logo & brand text so search fits inline */
+        .logo-icon {
+          width: 28px !important;
+          height: 28px !important;
+        }
+        .brand-name {
+          font-size: 1.1rem !important;
+        }
+
+        /* Mobile: search dropdown full-width from left screen edge */
+        @media (max-width: 767px) {
+          .search-dropdown {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: 77px !important;
+            width: 100vw !important;
+            border-radius: 0 0 8px 8px !important;
+            max-height: calc(100vh - 77px) !important;
+          }
+        }
+
+        /* Very small phones (< 380px): hide brand text, keep icon + search */
+        @media (max-width: 379px) {
+          .brand-name {
+            display: none !important;
+          }
+          .logo-icon {
+            width: 26px !important;
+            height: 26px !important;
+          }
+        }
+
+        /* Desktop: hide burger + mobile menu, show desktop nav + search */
         @media (min-width: 768px) {
           .burger-btn {
             display: none !important;
@@ -441,6 +464,13 @@ export const Header = () => {
           }
           .mobile-overlay {
             display: none !important;
+          }
+          .logo-icon {
+            width: 37px !important;
+            height: 37px !important;
+          }
+          .brand-name {
+            font-size: 1.5rem !important;
           }
         }
       `}} />

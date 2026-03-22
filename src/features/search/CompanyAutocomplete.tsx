@@ -178,6 +178,7 @@ export const CompanyAutocomplete: React.FC<CompanyAutocompleteProps> = ({
       {isOpen && results.length > 0 && (
         <div
           ref={dropdownRef}
+          className="search-dropdown"
           style={{
             position: 'absolute',
             top: 'calc(100% + 0.5rem)',
@@ -253,6 +254,7 @@ export const CompanyAutocomplete: React.FC<CompanyAutocompleteProps> = ({
       {isOpen && query.length >= 2 && !isLoading && results.length === 0 && (
         <div
           ref={dropdownRef}
+          className="search-dropdown"
           style={{
             position: 'absolute',
             top: 'calc(100% + 0.5rem)',

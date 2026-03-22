@@ -495,8 +495,8 @@ export const StockDetailPage = () => {
         </div>
         <p className="valuation-seo-text" style={{ margin: '0.4rem 0 0 0', fontSize: '0.7rem', color: 'var(--text-secondary, #9ca3af)', lineHeight: 1.5, textAlign: 'center', maxWidth: '380px' }}>
           {seoTextJsx}
-          {isLowConf && <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>Eingeschränkte Konfidenz — alle Modelle weichen stark vom Kurs ab.</span>}
-          {isExtremeDeviation && !isLowConf && <span style={{ display: 'block', marginTop: '0.2rem', color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>Hohe Abweichung vom Marktpreis — Datenqualität und Modelleignung prüfen.</span>}
+          {isLowConf && <span style={{ color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>{' '}Eingeschränkte Konfidenz — alle Modelle weichen stark vom Kurs ab.</span>}
+          {isExtremeDeviation && !isLowConf && <span style={{ color: 'rgba(245, 158, 11, 0.8)', fontSize: '0.72rem' }}>{' '}Hohe Abweichung vom Marktpreis — Datenqualität und Modelleignung prüfen.</span>}
         </p>
       </div>
     );
@@ -1283,9 +1283,9 @@ export const StockDetailPage = () => {
             flex: 1 1 100% !important;
           }
 
-          /* Chart container: zero padding, full width */
+          /* Chart container: right padding so last data point isn't clipped */
           .stock-detail-page .chart-section > div:nth-child(2) {
-            padding: 8px 0 0 0 !important;
+            padding: 8px 10px 0 0 !important;
             border-radius: 0 !important;
             height: 300px !important;
             margin: 0 !important;
@@ -1352,31 +1352,43 @@ export const StockDetailPage = () => {
             padding: 0.75rem !important;
           }
 
-          /* Valuation indicator: prominent on mobile — eye-catching! */
+          /* Valuation indicator: full-width, prominent on mobile */
+          .stock-detail-page .valuation-header-wrapper {
+            padding: 0 5px !important;
+            box-sizing: border-box !important;
+          }
           .stock-detail-page .valuation-indicator {
-            padding: 0.75rem 1.25rem !important;
+            padding: 10px !important;
             width: 100% !important;
-            max-width: 340px;
+            max-width: none !important;
             justify-content: center !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             border: none !important;
           }
-          .stock-detail-page .valuation-indicator > div:first-child,
-          .stock-detail-page .valuation-indicator > div:last-child {
-            min-width: 75px !important;
+          /* Bigger price/FV numbers on mobile */
+          .stock-detail-page .vi-value {
+            font-size: 1.6rem !important;
           }
-          .stock-detail-page .valuation-indicator > div:first-child > div:nth-child(2),
-          .stock-detail-page .valuation-indicator > div:last-child > div:nth-child(2) {
-            font-size: 1.25rem !important;
+          .stock-detail-page .vi-label {
+            font-size: 0.72rem !important;
           }
-          .stock-detail-page .valuation-indicator > div:nth-child(2) {
-            padding: 0 0.5rem !important;
-            min-width: 90px !important;
-            flex: 1 !important;
+          .stock-detail-page .vi-currency {
+            font-size: 0.72rem !important;
           }
-          .stock-detail-page .valuation-indicator > div:nth-child(2) > div:first-child {
-            font-size: 0.95rem !important;
-            padding: 0.25rem 0.75rem !important;
+          /* Bigger percentage pill */
+          .stock-detail-page .vi-pill {
+            font-size: 1rem !important;
+            padding: 0.3rem 0.9rem !important;
+          }
+          /* Arrow area wider for bigger elements */
+          .stock-detail-page .vi-arrow-area {
+            min-width: 100px !important;
+            padding: 0 0.8rem !important;
+          }
+          /* SEO text slightly bigger */
+          .stock-detail-page .valuation-seo-text {
+            font-size: 0.8rem !important;
+            margin-top: 0.6rem !important;
           }
         }
 
