@@ -16,6 +16,11 @@ export const ENDPOINTS = {
     EXPORT_DATA: '/auth/export', // GET - Export user data
   },
 
+  // Homepage endpoints (/api/homepage)
+  HOMEPAGE: {
+    SHOWCASE: '/homepage/showcase',
+  },
+
   // Stock data endpoints (/api/stocks)
   STOCKS: {
     GET_BY_TICKER: (ticker: string, refresh?: boolean) =>

@@ -32,6 +32,7 @@ import { Footer } from '@/widgets/Footer';
 import { CookieBanner } from '@/widgets/CookieBanner';
 import { useSessionKeepAlive } from '@/shared/hooks/useSessionKeepAlive';
 import { useCurrentUser } from '@/entities/auth/queries';
+import { ScrollToTop } from '@/shared/components/ScrollToTop';
 
 function App() {
   // CRITICAL: Initialize auth state and CSRF token on app startup
@@ -51,6 +52,7 @@ function App() {
       flexDirection: 'column',
       minHeight: '100vh'
     }}>
+      <ScrollToTop />
       <Header />
       <main style={{ flex: 1 }}>
         <Routes>

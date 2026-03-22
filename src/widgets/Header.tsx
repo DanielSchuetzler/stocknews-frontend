@@ -421,9 +421,9 @@ export const Header = () => {
           font-size: 1.1rem !important;
         }
 
-        /* Mobile: search dropdown full-width from left screen edge */
+        /* Mobile: header search dropdown full-width from left screen edge */
         @media (max-width: 767px) {
-          .search-dropdown {
+          header .search-dropdown {
             position: fixed !important;
             left: 0 !important;
             right: 0 !important;

@@ -9,3 +9,4 @@ export * from './company';
 export * from './news';
 export * from './favorite';
 export * from './fairValue';
+export * from './homepage';
