@@ -840,58 +840,9 @@ export const StockDetailPage = () => {
                   gap: '1rem',
                   flexWrap: 'wrap'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>
-                      News & Events
-                    </h2>
-                    <button
-                      onClick={() => setShowNewsOnChart(v => !v)}
-                      title={showNewsOnChart ? 'News im Chart ausblenden' : 'News im Chart einblenden'}
-                      style={{
-                        background: 'none',
-                        border: '1px solid var(--border-color, #374151)',
-                        borderRadius: '6px',
-                        padding: '0.3rem 0.5rem',
-                        cursor: 'pointer',
-                        color: showNewsOnChart ? 'var(--text-primary, #f3f4f6)' : 'var(--text-muted, #6b7280)',
-                        fontSize: '0.75rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        opacity: showNewsOnChart ? 1 : 0.5,
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {showNewsOnChart ? (
-                          <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-4.879-4.879" />
-                        )}
-                      </svg>
-                      Chart
-                    </button>
-                  </div>
-
-                  {isAuthenticated && (
-                    <button
-                      onClick={() => {
-                        setEditingNews(null);
-                        setIsAddModalOpen(true);
-                      }}
-                      className="btn-primary"
-                      style={{
-                        padding: '0.5rem 1rem',
-                        fontSize: '0.875rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}
-                    >
-                      <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>+</span>
-                      News hinzufügen
-                    </button>
-                  )}
+                  <h2 className="news-section-heading" style={{ color: 'var(--text-primary)', margin: 0 }}>
+                    News & Events
+                  </h2>
                 </div>
 
                 {/* News Type Toggle - Only show if authenticated */}
@@ -961,25 +912,81 @@ export const StockDetailPage = () => {
                     >
                       👤 Meine News ({userNewsData.length})
                     </button>
+                    <button
+                      onClick={() => {
+                        setEditingNews(null);
+                        setIsAddModalOpen(true);
+                      }}
+                      className="btn-primary"
+                      style={{
+                        marginLeft: 'auto',
+                        padding: '0.4rem 0.85rem',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span>
+                      Eigene News
+                    </button>
                   </div>
                 )}
 
-                {/* AI Disclaimer */}
-                {newsType === 'ai' && (
-                  <div style={{
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: '6px',
-                    padding: '0.5rem 0.75rem',
-                    marginBottom: '1rem',
-                    marginTop: '-1rem',
-                    fontSize: '0.8rem',
-                    color: 'var(--text-secondary)',
-                    display: 'inline-block'
-                  }}>
-                    ℹ️ AI-generiert, keine Anlageberatung
-                  </div>
-                )}
+                {/* Chart-Toggle + AI Disclaimer in one row */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '1rem',
+                  marginTop: '-0.5rem',
+                  flexWrap: 'wrap',
+                }}>
+                  <button
+                    onClick={() => setShowNewsOnChart(v => !v)}
+                    title={showNewsOnChart ? 'News im Chart ausblenden' : 'News im Chart einblenden'}
+                    style={{
+                      background: 'none',
+                      border: '1px solid var(--border-color, #374151)',
+                      borderRadius: '6px',
+                      padding: '0.3rem 0.6rem',
+                      cursor: 'pointer',
+                      color: showNewsOnChart ? 'var(--text-primary, #f3f4f6)' : 'var(--text-muted, #6b7280)',
+                      fontSize: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      opacity: showNewsOnChart ? 1 : 0.6,
+                      transition: 'all 0.2s',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {showNewsOnChart ? (
+                        <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878l4.242 4.242M21 21l-4.879-4.879" />
+                      )}
+                    </svg>
+                    <span className="chart-btn-mobile">Chart</span>
+                    <span className="chart-btn-desktop">Im Chart anzeigen</span>
+                  </button>
+                  {newsType === 'ai' && (
+                    <div style={{
+                      marginLeft: 'auto',
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '6px',
+                      padding: '0.5rem 0.75rem',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-secondary)',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      ℹ️ AI-generiert, keine Anlageberatung
+                    </div>
+                  )}
+                </div>
 
                 {/* News List */}
                 <NewsList
@@ -1140,6 +1147,12 @@ export const StockDetailPage = () => {
             position: sticky;
             top: 80px;
           }
+          /* News heading hidden on desktop (tab already says "News & Events") */
+          .stock-detail-page .news-section-heading { display: block; }
+          /* Chart button label: short on mobile, long on desktop */
+          .chart-btn-desktop { display: none; }
+          .chart-btn-mobile { display: inline; }
+
           /* Stock info: plain inline row, no box, same as mobile */
           .stock-detail-page .stock-info-box {
             background: transparent !important;
@@ -1156,6 +1169,10 @@ export const StockDetailPage = () => {
           .stock-detail-page .stock-info-box span {
             font-size: 0.85rem !important;
           }
+          /* News heading hidden on desktop, long chart label visible */
+          .stock-detail-page .news-section-heading { display: none !important; }
+          .chart-btn-desktop { display: inline !important; }
+          .chart-btn-mobile { display: none !important; }
         }
 
         /* ===== MOBILE: Full-width charts, no padding ===== */
