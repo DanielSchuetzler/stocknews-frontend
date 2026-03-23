@@ -453,7 +453,11 @@ export const HomePage = () => {
         .hp-hero {
           position: relative;
           overflow: visible;
-          padding: clamp(4rem, 10vw, 8rem) 0 clamp(3rem, 6vw, 5rem);
+          min-height: calc(100vh - 77px); /* full viewport minus header */
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: clamp(3rem, 6vw, 5rem) 0;
           text-align: center;
         }
 
