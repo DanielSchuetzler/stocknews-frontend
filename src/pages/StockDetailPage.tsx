@@ -303,35 +303,20 @@ export const StockDetailPage = () => {
   const currencySymbol = stockData.currency === 'USD' ? '$' : stockData.currency === 'EUR' ? '€' : stockData.currency;
   const exchange = company?.exchange || stockData.exchange || '';
 
-  // SEO: Catchy Meta-Texte mit echten Fair Value Zahlen
+  // Fair Value data for FAQ schema
   const fairValue = fairValueData?.explanation?.fairValueCombined;
   const fairValuePrice = fairValueData?.explanation?.currentPrice;
   const verdict = fairValueData?.explanation?.valuationVerdict;
   const upsidePercent = fairValueData?.explanation?.upsidePercent;
 
-  // Dynamic catchy description – "Fair Value" immer am Anfang für SEO-Ranking
-  let metaDescription: string;
-  if (fairValue && fairValuePrice && verdict && upsidePercent !== null && upsidePercent !== undefined) {
-    const fvFormatted = fairValue.toFixed(2);
-    const priceFormatted = fairValuePrice.toFixed(2);
-    const absUpside = Math.abs(upsidePercent).toFixed(0);
-    if (verdict.includes('unter')) {
-      metaDescription = `Fair Value ${companyName} (${ticker}): ${fvFormatted} ${currencySymbol} – aktueller Kurs nur ${priceFormatted} ${currencySymbol}. ${absUpside}% unterbewertet laut KI-Analyse! Jetzt kostenlos prüfen auf BrainyTrader.`;
-    } else if (verdict.includes('über')) {
-      metaDescription = `Fair Value ${companyName} (${ticker}): ${fvFormatted} ${currencySymbol} – Kurs ${priceFormatted} ${currencySymbol} liegt ${absUpside}% über dem fairen Wert. KI-gestützte Analyse auf BrainyTrader.`;
-    } else {
-      metaDescription = `Fair Value ${companyName} (${ticker}): ${fvFormatted} ${currencySymbol} – Kurs ${priceFormatted} ${currencySymbol}. Aktie ist fair bewertet. KI-Analyse mit DCF, Graham & mehr auf BrainyTrader.`;
-    }
-  } else {
-    metaDescription = `Fair Value ${companyName} (${ticker}): Aktueller Kurs ${latestPrice} ${currencySymbol} – über- oder unterbewertet? KI-gestützte Analyse mit 4 Modellen. Kostenlos auf BrainyTrader.`;
-  }
+  // SEO: Meta-Tags konsistent mit Backend Pre-Rendering (SeoPreRenderController)
+  // Description macht neugierig, verrät NICHT den Fair Value → maximale Klickrate
+  const metaDescription = `${companyName} (${ticker}) – Ist die Aktie wirklich fair bewertet? Unsere KI analysiert ${companyName} mit DCF, Graham, Lynch & Ertragswert. Jetzt kostenlos den fairen Wert entdecken.`;
 
-  // Title: "Fair Value" vorne für SEO-Ranking bei "[Company] Fair Value" Suchen
-  const pageTitle = `${companyName} (${ticker}) Fair Value – KI-Aktienanalyse | BrainyTrader`;
-  const ogTitle = `${companyName} Fair Value – Über- oder unterbewertet? | BrainyTrader`;
-  const ogDescription = fairValue && fairValuePrice
-    ? `Fair Value ${companyName}: ${fairValue.toFixed(2)} ${currencySymbol} vs. Kurs ${fairValuePrice.toFixed(2)} ${currencySymbol}. KI-Bewertung mit DCF, Graham, Lynch & Ertragswert – kostenlos auf BrainyTrader.`
-    : `Fair Value ${companyName} – über- oder unterbewertet? KI-gestützte Analyse mit 4 wissenschaftlichen Modellen. Kostenlos auf BrainyTrader.`;
+  // Title: Unternehmensname + "Fair Value" für SEO-Ranking bei "[Company] Fair Value" Suchen
+  const pageTitle = `${companyName} Aktie – Fair Value Analyse & Bewertung | BrainyTrader`;
+  const ogTitle = `Ist ${companyName} über- oder unterbewertet? Fair Value Analyse`;
+  const ogDescription = `${companyName} (${ticker}) – KI-gestützte Bewertung mit 4 wissenschaftlichen Modellen. Finde heraus, ob die Aktie aktuell ein Kauf ist.`;
   const canonicalUrl = `https://brainytrader.info/stocks/${ticker}`;
 
   // JSON-LD: Strukturierte Daten für die Stock-Seite
