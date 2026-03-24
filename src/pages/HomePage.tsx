@@ -114,7 +114,7 @@ export const HomePage = () => {
 
           <p className="hp-subheadline hero-description">
             Unsere KI berechnet den fairen Wert jeder Aktie — mit den gleichen Modellen,
-            die Goldman Sachs und Morgan Stanley nutzen. Kostenlos. Für 15.000+ Aktien.
+            die Goldman Sachs und Morgan Stanley nutzen.
           </p>
 
           {/* Search — must sit above trust bar + showcase section */}
@@ -130,8 +130,8 @@ export const HomePage = () => {
             </div>
             <div className="hp-trust-divider" />
             <div className="hp-trust-item">
-              <span className="hp-trust-number">4</span>
-              <span className="hp-trust-label">Fair-Value-Verfahren</span>
+              <span className="hp-trust-number">5</span>
+              <span className="hp-trust-label">Fair-Value-Methoden</span>
             </div>
             <div className="hp-trust-divider" />
             <div className="hp-trust-item">
