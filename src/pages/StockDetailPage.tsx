@@ -299,7 +299,6 @@ export const StockDetailPage = () => {
   }
 
   const companyName = company?.name || stockData.name || ticker;
-  const latestPrice = stockData.prices[stockData.prices.length - 1].close.toFixed(2);
   const currencySymbol = stockData.currency === 'USD' ? '$' : stockData.currency === 'EUR' ? '€' : stockData.currency;
   const exchange = company?.exchange || stockData.exchange || '';
 
